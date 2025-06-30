@@ -1,0 +1,16 @@
+{
+  "name": "ai-chatbot-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install": "npm run install:backend && npm run install:frontend",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "concurrently \"npm:dev:*\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
