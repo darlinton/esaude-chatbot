@@ -10,9 +10,10 @@
     "dev:frontend": "npm --prefix frontend run dev",
     "dev": "concurrently \"npm:dev:*\"",
     "build:frontend:prod": "npm --prefix frontend run build",
-    "start:backend:prod": "npm --prefix backend start",
     "serve:frontend:prod": "serve -s frontend/build",
-    "prod": "npm run build:frontend:prod && concurrently \"npm run serve:frontend:prod\" \"npm run start:backend:prod\""
+    "start:backend:prod": "npm --prefix backend start",
+    "start:prod": "concurrently \"npm run serve:frontend:prod\" \"npm run start:backend:prod\"",
+    "prod": "npm run build:frontend:prod && npm run start:prod"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

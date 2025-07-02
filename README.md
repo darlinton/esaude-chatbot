@@ -59,6 +59,6 @@ Please give me a detailed development plan that includes:
 ## How to install and run
  > npm run install
 - Obs: don't forget to setup the backend/.env  (mongodb credentials)
-> npm run prod
-
-
+> npm run dev or npm run prod
+next time on production
+> npm run start:prod
