@@ -56,4 +56,5 @@ Please give me a detailed development plan that includes:
 - Sequence of development tasks
 
 
-
+## The prod script
+ The script will be npm run build && serve -s build. The -s flag is important because it serves the build folder as a single-page application.

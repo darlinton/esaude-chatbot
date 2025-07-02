@@ -23,7 +23,7 @@ export const ChatProvider = ({ children }) => {
             setLoading(false);
             return { success: false, message: error };
         }
-    }, []);
+    }, [error]);
 
     const fetchMessages = useCallback(async (sessionId) => {
         setLoading(true);
@@ -38,7 +38,7 @@ export const ChatProvider = ({ children }) => {
             setLoading(false);
             return { success: false, message: error };
         }
-    }, []);
+    }, [error]);
 
     const sendMessage = useCallback(async (sessionId, content) => {
         setError(null);
@@ -50,7 +50,7 @@ export const ChatProvider = ({ children }) => {
             setError(err.response?.data?.message || 'Failed to send message');
             return { success: false, message: error };
         }
-    }, []);
+    }, [error]);
 
     const submitEvaluation = useCallback(async (sessionId, rating, comment) => {
         setError(null);
@@ -61,7 +61,7 @@ export const ChatProvider = ({ children }) => {
             setError(err.response?.data?.message || 'Failed to submit evaluation');
             return { success: false, message: error };
         }
-    }, []);
+    }, [error]);
 
     const fetchEvaluation = useCallback(async (sessionId) => {
         setError(null);
@@ -76,7 +76,7 @@ export const ChatProvider = ({ children }) => {
             setError(err.response?.data?.message || 'Failed to fetch evaluation');
             return { success: false, message: error };
         }
-    }, []);
+    }, [error]);
 
     const value = {
         currentSession,
