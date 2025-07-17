@@ -7,7 +7,7 @@ import { useChat } from '../../context/ChatContext';
 const ChatWindow = ({ sessionId }) => {
     const { messages, loading, error, fetchMessages, sendMessage } = useChat();
     const messagesEndRef = useRef(null);
-    const [selectedBot, setSelectedBot] = useState('chatgpt'); // Default bot
+    const [selectedBot, setSelectedBot] = useState('replay'); // Default bot
 
     useEffect(() => {
         if (sessionId) {
@@ -35,9 +35,9 @@ const ChatWindow = ({ sessionId }) => {
                     value={selectedBot}
                     onChange={(e) => setSelectedBot(e.target.value)}
                 >
-                    <option value="chatgpt">ChatGPT</option>
-                    <option value="bard">Bard</option>
+                    <option value="replay">Replay</option>
                     <option value="openai">OpenAI</option>
+                    <option value="gemini">Gemini</option>
                 </select>
             </div>
             <div className="flex-grow p-4 overflow-y-auto">
