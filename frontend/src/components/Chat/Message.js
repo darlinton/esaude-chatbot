@@ -6,9 +6,9 @@ const Message = ({ message }) => {
     const alignmentClass = isUser ? 'items-end' : 'items-start';
 
     return (
-        <div className={`flex flex-col ${alignmentClass} mb-2`}>
-            <div className={`rounded-lg p-3 max-w-xs ${messageClass}`}>
-                <p>{message.content}</p>
+        <div className={`flex flex-col ${alignmentClass} mb-4`}>
+            <div className={`rounded-lg p-4 max-w-2xl ${messageClass}`}>
+                <p className="text-base">{message.content}</p>
             </div>
             <span className="text-xs text-gray-500 mt-1">
                 {new Date(message.timestamp).toLocaleTimeString()} - {message.sender}

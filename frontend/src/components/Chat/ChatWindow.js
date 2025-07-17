@@ -5,9 +5,9 @@ import Spinner from '../Common/Spinner';
 import { useChat } from '../../context/ChatContext';
 
 const ChatWindow = ({ sessionId }) => {
-    const { messages, loading, error, fetchMessages, sendMessage } = useChat();
+    const { messages, loading, error, fetchMessages, sendMessage, isSendingMessage } = useChat(); // Destructure isSendingMessage
     const messagesEndRef = useRef(null);
-    const [selectedBot, setSelectedBot] = useState('replay'); // Default bot
+    const [selectedBot, setSelectedBot] = useState('openai'); // Default bot
 
     useEffect(() => {
         if (sessionId) {
@@ -35,9 +35,9 @@ const ChatWindow = ({ sessionId }) => {
                     value={selectedBot}
                     onChange={(e) => setSelectedBot(e.target.value)}
                 >
-                    <option value="replay">Replay</option>
                     <option value="openai">OpenAI</option>
                     <option value="gemini">Gemini</option>
+                    <option value="replay">Replay</option>
                 </select>
             </div>
             <div className="flex-grow p-4 overflow-y-auto">
@@ -50,7 +50,12 @@ const ChatWindow = ({ sessionId }) => {
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            <MessageInput onSendMessage={handleSendMessage} disabled={!sessionId} />
+            {isSendingMessage && ( // Conditionally render spinner when message is being sent
+                <div className="flex justify-center p-2">
+                    <Spinner />
+                </div>
+            )}
+            <MessageInput onSendMessage={handleSendMessage} disabled={!sessionId || isSendingMessage} />
         </div>
     );
 };

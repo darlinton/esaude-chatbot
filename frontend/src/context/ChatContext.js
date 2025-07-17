@@ -10,6 +10,7 @@ export const ChatProvider = ({ children }) => {
     const [currentSession, setCurrentSession] = useState(null);
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [isSendingMessage, setIsSendingMessage] = useState(false); // New state for message sending
     const [error, setError] = useState(null);
 
     const fetchChatSessions = useCallback(async () => {
@@ -46,7 +47,8 @@ export const ChatProvider = ({ children }) => {
         }
     }, []);
 
-    const sendMessage = useCallback(async (sessionId, content, botType) => {
+    const sendMessage = useCallback(async (sessionId, content, botType = 'openai') => {
+        setIsSendingMessage(true); // Set loading to true when sending message
         setError(null);
         try {
             const { data } = await api.sendMessage(sessionId, content, botType);
@@ -57,6 +59,8 @@ export const ChatProvider = ({ children }) => {
             console.error('Error sending message:', err);
             setError(err.response?.data?.message || 'Failed to send message.');
             return { success: false, message: error };
+        } finally {
+            setIsSendingMessage(false); // Set loading to false after message is sent or fails
         }
     }, [fetchChatSessions, error]);
 
@@ -118,6 +122,7 @@ export const ChatProvider = ({ children }) => {
         messages,
         setMessages,
         loading,
+        isSendingMessage, // Include new state in context value
         error,
         fetchMessages,
         sendMessage,
