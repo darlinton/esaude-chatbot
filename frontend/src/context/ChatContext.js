@@ -1,61 +1,89 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
-import API from '../api';
+import { useAuth } from './AuthContext';
+import * as api from '../api';
 
 const ChatContext = createContext(null);
 
 export const ChatProvider = ({ children }) => {
+    const { user } = useAuth();
+    const [chatSessions, setChatSessions] = useState([]);
     const [currentSession, setCurrentSession] = useState(null);
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const startNewChat = useCallback(async (title = 'New Chat') => {
+    const fetchChatSessions = useCallback(async () => {
+        if (!user) {
+            setChatSessions([]);
+            return;
+        }
         setLoading(true);
         setError(null);
         try {
-            const { data } = await API.post('/chats', { title });
-            setCurrentSession(data);
-            setMessages([]); // Clear messages for new session
-            setLoading(false);
-            return { success: true, session: data };
+            const { data } = await api.getChatSessions();
+            setChatSessions(data);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to start new chat');
+            console.error('Error fetching chat sessions:', err);
+            setError('Failed to load chat sessions.');
+        } finally {
             setLoading(false);
-            return { success: false, message: error };
         }
-    }, [error]);
+    }, [user]);
 
     const fetchMessages = useCallback(async (sessionId) => {
         setLoading(true);
         setError(null);
         try {
-            const { data } = await API.get(`/messages/${sessionId}`);
-            setMessages(data);
-            setLoading(false);
-            return { success: true, messages: data };
+            const { data } = await api.getChatSessionById(sessionId);
+            setCurrentSession(data);
+            setMessages(data.messages || []);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to fetch messages');
+            console.error('Error fetching messages:', err);
+            setError('Failed to load messages.');
+            setMessages([]);
+        } finally {
             setLoading(false);
-            return { success: false, message: error };
         }
-    }, [error]);
+    }, []);
 
-    const sendMessage = useCallback(async (sessionId, content) => {
+    const sendMessage = useCallback(async (sessionId, content, botType) => {
         setError(null);
         try {
-            const { data } = await API.post('/messages', { sessionId, content });
+            const { data } = await api.sendMessage(sessionId, content, botType);
             setMessages((prevMessages) => [...prevMessages, data.userMessage, data.botMessage]);
+            fetchChatSessions(); // Refresh sessions to update last message/timestamp
             return { success: true, response: data };
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to send message');
+            console.error('Error sending message:', err);
+            setError(err.response?.data?.message || 'Failed to send message.');
             return { success: false, message: error };
+        }
+    }, [fetchChatSessions, error]);
+
+    const startNewChat = useCallback(async (title = 'New Chat') => {
+        setLoading(true);
+        setError(null);
+        try {
+            const { data } = await api.createChatSession(title);
+            setChatSessions((prevSessions) => [data, ...prevSessions]);
+            setCurrentSession(data);
+            setMessages([]);
+            return { success: true, session: data };
+        } catch (err) {
+            console.error('Error creating new chat session:', err);
+            setError(err.response?.data?.message || 'Failed to create new chat session.');
+            return { success: false, message: error };
+        } finally {
+            setLoading(false);
         }
     }, [error]);
 
+    // Placeholder for evaluation functions, if they were in the original context
     const submitEvaluation = useCallback(async (sessionId, rating, comment) => {
         setError(null);
         try {
-            const { data } = await API.post('/evaluations', { sessionId, rating, comment });
+            // Assuming an API call for evaluation exists
+            const { data } = await api.submitEvaluation(sessionId, rating, comment);
             return { success: true, evaluation: data };
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to submit evaluation');
@@ -64,32 +92,38 @@ export const ChatProvider = ({ children }) => {
     }, [error]);
 
     const fetchEvaluation = useCallback(async (sessionId) => {
-        setError(null);
+        if (!sessionId) {
+            return { success: true, evaluation: null };
+        }
         try {
-            const { data } = await API.get(`/evaluations/${sessionId}`);
+            const { data } = await api.fetchEvaluation(sessionId);
+            // If data is null or undefined, it means no evaluation was found.
             return { success: true, evaluation: data };
         } catch (err) {
-            // If no evaluation is found, the backend returns 404, which is not an error in this context
+            // A 404 error is expected if no evaluation exists, so we treat it as a success case.
             if (err.response && err.response.status === 404) {
                 return { success: true, evaluation: null };
             }
-            setError(err.response?.data?.message || 'Failed to fetch evaluation');
-            return { success: false, message: error };
+            // For other errors, we log them and return a failure state.
+            console.error('Failed to fetch evaluation:', err);
+            return { success: false, message: err.response?.data?.message || 'Failed to fetch evaluation' };
         }
-    }, [error]);
+    }, []);
 
     const value = {
+        chatSessions,
+        fetchChatSessions,
         currentSession,
         setCurrentSession,
         messages,
         setMessages,
         loading,
         error,
-        startNewChat,
         fetchMessages,
         sendMessage,
+        startNewChat,
         submitEvaluation,
-        fetchEvaluation, // Add fetchEvaluation to the context value
+        fetchEvaluation,
     };
 
     return (

@@ -13,6 +13,7 @@ const DashboardPage = () => {
     const [showEvaluationForm, setShowEvaluationForm] = useState(false);
     const [selectedSessionForEval, setSelectedSessionForEval] = useState(null);
     const [sessionEvaluation, setSessionEvaluation] = useState(null); // New state for evaluation
+    const [isNewSession, setIsNewSession] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -22,19 +23,20 @@ const DashboardPage = () => {
 
     useEffect(() => {
         const getEvaluation = async () => {
-            if (currentSession) {
+            if (currentSession?.evaluation) { // Only fetch if an evaluation is associated
                 const result = await fetchEvaluation(currentSession._id);
                 if (result.success) {
                     setSessionEvaluation(result.evaluation);
                 } else {
-                    setSessionEvaluation(null); // Clear if no evaluation or error
+                    setSessionEvaluation(null);
                 }
             } else {
-                setSessionEvaluation(null); // Clear when no session is selected
+                setSessionEvaluation(null);
             }
         };
+
         getEvaluation();
-    }, [currentSession, fetchEvaluation]); // Depend on currentSession and fetchEvaluation
+    }, [currentSession, fetchEvaluation, isNewSession]);
 
     const fetchChatSessions = async () => {
         try {
@@ -46,6 +48,7 @@ const DashboardPage = () => {
     };
 
     const handleStartNewChat = async () => {
+        setIsNewSession(true); // Mark session as new to prevent premature evaluation fetch
         const result = await startNewChat();
         if (result.success) {
             fetchChatSessions(); // Refresh list to show new session
@@ -53,6 +56,7 @@ const DashboardPage = () => {
     };
 
     const handleSelectSession = (session) => {
+        setIsNewSession(false); // Existing sessions are not new
         setCurrentSession(session);
     };
 

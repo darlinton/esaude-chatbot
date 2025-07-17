@@ -11,9 +11,18 @@ const MessageSchema = new mongoose.Schema({
         enum: ['user', 'bot'],
         required: true
     },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false // Not required for bot messages
+    },
     content: {
         type: String,
         required: true
+    },
+    botType: {
+        type: String,
+        required: false
     },
     timestamp: {
         type: Date,

@@ -3,7 +3,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 const SignUpForm = () => {
-    const [username, setUsername] = useState('');
+    const [displayName, setDisplayName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -13,7 +13,7 @@ const SignUpForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
-        const result = await signup(username, email, password);
+        const result = await signup(displayName, email, password);
         if (result.success) {
             navigate('/dashboard');
         } else {
@@ -26,15 +26,15 @@ const SignUpForm = () => {
             <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
             {message && <p className="text-red-500 text-center mb-4">{message}</p>}
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                    Username
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="displayName">
+                    Display Name
                 </label>
                 <input
                     type="text"
-                    id="username"
+                    id="displayName"
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
                     required
                 />
             </div>

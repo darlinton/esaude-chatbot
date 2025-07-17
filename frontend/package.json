@@ -17,11 +17,11 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "LOG_LEVEL=debug react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "react-scripts start",
+    "dev": "LOG_LEVEL=debug react-scripts start",
     "postinstall": "tailwindcss init -p",
     "preview:build": "serve -s build"
   },

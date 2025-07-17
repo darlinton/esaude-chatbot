@@ -1,15 +1,15 @@
 const Message = require('../models/Message');
 const ChatSession = require('../models/ChatSession');
-const { getBotResponse } = require('../utils/chatbotService');
+const { generateBotResponse } = require('../utils/chatbotService');
 
 // @desc    Send a new message and get bot response
 // @route   POST /api/messages
 // @access  Private
 const sendMessage = async (req, res) => {
-    const { sessionId, content } = req.body;
+    const { sessionId, content, botType } = req.body;
 
-    if (!sessionId || !content) {
-        return res.status(400).json({ message: 'Session ID and content are required' });
+    if (!sessionId || !content || !botType) {
+        return res.status(400).json({ message: 'Session ID, content and botType are required' });
     }
 
     try {
@@ -22,17 +22,22 @@ const sendMessage = async (req, res) => {
         const userMessage = await Message.create({
             session: sessionId,
             sender: 'user',
+            user: req.user.id,
             content: content
         });
 
-        // Get bot response (placeholder or actual AI call)
-        const botResponseContent = await getBotResponse(content);
+        // Fetch chat history
+        const history = await Message.find({ session: sessionId }).sort({ timestamp: 1 });
+
+        // Get bot response
+        const botResponseContent = await generateBotResponse(content, history, botType);
 
         // Save bot message
         const botMessage = await Message.create({
             session: sessionId,
             sender: 'bot',
-            content: botResponseContent
+            content: botResponseContent,
+            botType: botType
         });
 
         res.status(201).json({ userMessage, botMessage });

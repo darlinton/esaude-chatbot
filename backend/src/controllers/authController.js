@@ -12,9 +12,9 @@ const generateToken = (id) => {
 // @route   POST /api/auth/signup
 // @access  Public
 const signupUser = async (req, res) => {
-    const { username, email, password } = req.body;
+    const { displayName, email, password } = req.body;
 
-    if (!username || !email || !password) {
+    if (!displayName || !email || !password) {
         return res.status(400).json({ message: 'Please enter all fields' });
     }
 
@@ -26,7 +26,7 @@ const signupUser = async (req, res) => {
 
     // Create user
     const user = await User.create({
-        username,
+        displayName,
         email,
         password,
     });
@@ -34,7 +34,7 @@ const signupUser = async (req, res) => {
     if (user) {
         res.status(201).json({
             _id: user.id,
-            username: user.username,
+            displayName: user.displayName,
             email: user.email,
             token: generateToken(user._id),
         });
@@ -55,7 +55,7 @@ const loginUser = async (req, res) => {
     if (user && (await user.matchPassword(password))) {
         res.json({
             _id: user.id,
-            username: user.username,
+            displayName: user.displayName,
             email: user.email,
             token: generateToken(user._id),
         });
@@ -65,6 +65,6 @@ const loginUser = async (req, res) => {
 };
 
 module.exports = {
-    signupUser,
-    loginUser,
+    signup: signupUser,
+    login: loginUser,
 };

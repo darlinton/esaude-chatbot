@@ -30,6 +30,10 @@ const submitEvaluation = async (req, res) => {
             comment
         });
 
+        // Associate the evaluation with the chat session
+        session.evaluation = evaluation._id;
+        await session.save();
+
         res.status(201).json(evaluation);
     } catch (error) {
         res.status(500).json({ message: error.message });

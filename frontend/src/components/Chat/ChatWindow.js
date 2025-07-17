@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Message from './Message';
 import MessageInput from './MessageInput';
 import Spinner from '../Common/Spinner';
@@ -7,6 +7,7 @@ import { useChat } from '../../context/ChatContext';
 const ChatWindow = ({ sessionId }) => {
     const { messages, loading, error, fetchMessages, sendMessage } = useChat();
     const messagesEndRef = useRef(null);
+    const [selectedBot, setSelectedBot] = useState('chatgpt'); // Default bot
 
     useEffect(() => {
         if (sessionId) {
@@ -19,7 +20,7 @@ const ChatWindow = ({ sessionId }) => {
     }, [messages]);
 
     const handleSendMessage = async (content) => {
-        await sendMessage(sessionId, content);
+        await sendMessage(sessionId, content, selectedBot);
     };
 
     if (loading) return <Spinner />;
@@ -27,6 +28,18 @@ const ChatWindow = ({ sessionId }) => {
 
     return (
         <div className="flex flex-col flex-1 bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-gray-800">Chat with:</h2>
+                <select
+                    className="p-2 border border-gray-300 rounded-md"
+                    value={selectedBot}
+                    onChange={(e) => setSelectedBot(e.target.value)}
+                >
+                    <option value="chatgpt">ChatGPT</option>
+                    <option value="bard">Bard</option>
+                    <option value="openai">OpenAI</option>
+                </select>
+            </div>
             <div className="flex-grow p-4 overflow-y-auto">
                 {messages.length === 0 ? (
                     <div className="text-center text-gray-500 mt-10">Start typing to begin your chat!</div>

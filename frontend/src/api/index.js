@@ -14,19 +14,31 @@ API.interceptors.request.use((req) => {
 API.interceptors.response.use(
     (res) => res,
     (error) => {
+        // The browser's developer console will naturally log 404 errors for failed network requests.
+        // This is expected behavior and cannot be programmatically suppressed.
+        // The following logic ensures that while the browser logs the error, our application handles it gracefully
+        // by not flooding the console with additional custom error messages for expected "Not Found" scenarios,
+        // such as checking for an evaluation that doesn't exist yet.
+        if (error.response?.status !== 404 || !error.config.url.includes('/evaluations/')) {
+            console.error("API Error:", error.response || error.message);
+        }
+
         if (error.response && error.response.status === 401) {
-            // Check if the error is due to token expiration
-            // The backend sends 'Not authorized, token failed' or 'Not authorized, no token'
-            // We can infer token expiration if the status is 401 and there was a token in the request
             const profile = localStorage.getItem('profile');
             if (profile) {
-                // If there was a profile, it means the token likely expired or was invalid
-                localStorage.removeItem('profile'); // Clear expired token
-                window.location.href = '/login'; // Redirect to login page
+                localStorage.removeItem('profile');
+                window.location.href = '/login';
             }
         }
         return Promise.reject(error);
     }
 );
+
+export const createChatSession = (title) => API.post('/chats', { title: title });
+export const getChatSessions = () => API.get('/chats');
+export const getChatSessionById = (id) => API.get(`/chats/${id}`);
+export const sendMessage = (sessionId, content, botType) => API.post(`/chats/${sessionId}/messages`, { sessionId, content, botType });
+export const submitEvaluation = (sessionId, rating, comment) => API.post('/evaluations', { sessionId, rating, comment });
+export const fetchEvaluation = (sessionId) => API.get(`/evaluations/${sessionId}`);
 
 export default API;

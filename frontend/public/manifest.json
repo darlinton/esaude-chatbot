@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "eSaúdeZap",
+  "name": "eSaúdeZap - Atendimento instantâneo, cuidado sempre acessível.",
   "icons": [
     {
       "src": "favicon.ico",
