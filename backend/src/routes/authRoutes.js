@@ -5,14 +5,14 @@ module.exports = (app) => {
   app.post('/api/auth/signup', authController.signup);
   app.post('/api/auth/login', authController.login);
   app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-  app.get(
-    '/api/auth/google/callback',
-    passport.authenticate('google', { session: false }),
-    (req, res) => {
-      console.log('Google authentication callback called');
-      res.redirect('/dashboard');
-    }
-  );
+app.get(
+  '/api/auth/google/callback',
+  passport.authenticate('google'),
+  (req, res) => {
+    console.log('Google authentication callback called');
+    res.redirect('/dashboard');
+  }
+);
 
   app.get('/api/logout', (req, res) => {
     req.logout((err) => {
