@@ -33,10 +33,12 @@ passport.use(
 
             if (existingUser) {
                 // If a user with this email already exists, return that user
+                console.info("Google login:", existingUser);
                 return done(null, existingUser);
             }
 
             try {
+                console.info("Google new login:", userEmail);
                 const newUser = await new User({
                     googleId: profile.id,
                     displayName: profile.displayName,
