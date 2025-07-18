@@ -108,7 +108,7 @@ class GeminiBot extends BotInterface {
       const chat = this.model.startChat({
         history: messages,
         generationConfig: {
-          maxOutputTokens: 240,
+          maxOutputTokens: 500,
         },
       });
 
