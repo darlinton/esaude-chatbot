@@ -77,7 +77,7 @@ const googleAuthCallback = async (req, res) => {
 
         // Redirect to the frontend with the token and user info in the query string
         const user = req.user;
-        res.redirect(`${process.env.FRONTEND_URL}/auth/google/callback?token=${token}&id=${user._id}&displayName=${user.displayName}&email=${user.email}`);
+        res.redirect(`/auth/google/callback?token=${token}&id=${user._id}&displayName=${user.displayName}&email=${user.email}`);
     } catch (error) {
         console.error('Google authentication callback error:', error);
         res.status(500).json({ message: 'Error handling Google authentication callback' });
