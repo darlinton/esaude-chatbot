@@ -19,7 +19,7 @@
   },
   "dashboardPage": {
     "loginPrompt": "Por favor, faça login para ver esta página.",
-    "yourChatSessions": "Suas Sessões de Chat",
+    "yourChatSessions": "Sessões de Chat",
     "startNewChat": "Iniciar Novo Chat",
     "selectSessionPrompt": "Selecione uma sessão de chat ou inicie uma nova.",
     "endChatEvaluate": "Avaliar",

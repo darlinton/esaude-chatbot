@@ -31,10 +31,10 @@ const ChatWindow = ({ sessionId }) => {
 
     return (
         <div className="flex flex-col flex-1 bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-800">{t('chatWindow.chatWith')}</h2>
+            <div className="p-3 sm:p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center">
+                <h2 className="text-lg font-semibold text-gray-800 mb-2 sm:mb-0">{t('chatWindow.chatWith')}</h2>
                 <select
-                    className="p-2 border border-gray-300 rounded-md"
+                    className="p-2 border border-gray-300 rounded-md w-full sm:w-auto text-base"
                     value={selectedBot}
                     onChange={(e) => setSelectedBot(e.target.value)}
                 >
@@ -43,7 +43,7 @@ const ChatWindow = ({ sessionId }) => {
                     <option value="replay">Replay</option>
                 </select>
             </div>
-            <div className="flex-grow p-4 overflow-y-auto">
+            <div className="flex-grow p-3 sm:p-4 overflow-y-auto">
                 {messages.length === 0 ? (
                     <div className="text-center text-gray-500 mt-10">{t('chatWindow.startTyping')}</div>
                 ) : (

@@ -77,17 +77,31 @@ const DashboardPage = () => {
 
     const { t } = useTranslation();
 
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar visibility
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
     if (authLoading) return <Spinner />;
     if (!user) return <div className="text-center p-4">{t('dashboardPage.loginPrompt')}</div>;
 
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex flex-col h-screen bg-gray-100 lg:flex-row">
             {/* Sidebar for chat sessions */}
-            <div className="w-1/4 bg-white p-4 border-r border-gray-200 flex flex-col">
-                <h3 className="text-xl font-bold mb-4">{t('dashboardPage.yourChatSessions')}</h3>
+            <div className={`fixed inset-y-0 left-0 w-64 bg-white p-4 border-r border-gray-200 flex flex-col transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out z-40 lg:relative lg:w-1/4 lg:translate-x-0`}>
+                <div className="flex justify-between items-center mb-4 lg:hidden">
+                    <h3 className="text-xl font-bold">{t('dashboardPage.yourChatSessions')}</h3>
+                    <button onClick={toggleSidebar} className="text-gray-800 focus:outline-none p-2">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <h3 className="hidden lg:block text-xl font-bold mb-4">{t('dashboardPage.yourChatSessions')}</h3>
                 <button
                     onClick={handleStartNewChat}
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4 w-full"
+                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4 w-full text-base"
                 >
                     {t('dashboardPage.startNewChat')}
                 </button>
@@ -100,11 +114,11 @@ const DashboardPage = () => {
                         chatSessions.map((session) => (
                             <div
                                 key={session._id}
-                                onClick={() => handleSelectSession(session)}
-                                className={`p-3 mb-2 rounded-lg cursor-pointer ${currentSession?._id === session._id ? 'bg-blue-100 border-blue-500 border' : 'bg-gray-50 hover:bg-gray-100'}`}
+                                onClick={() => { handleSelectSession(session); setIsSidebarOpen(false); }}
+                                className={`p-3 mb-2 rounded-lg cursor-pointer text-sm ${currentSession?._id === session._id ? 'bg-blue-100 border-blue-500 border' : 'bg-gray-50 hover:bg-gray-100'}`}
                             >
                                 <p className="font-semibold">{session.title}</p>
-                                <p className="text-sm text-gray-500">{new Date(session.createdAt).toLocaleDateString()}</p>
+                                <p className="text-xs text-gray-500">{new Date(session.createdAt).toLocaleDateString()}</p>
                             </div>
                         ))
                     )}
@@ -113,29 +127,39 @@ const DashboardPage = () => {
 
             {/* Main chat window area */}
             <div className="flex-grow flex flex-col">
-                <div className="flex-grow p-4">
+                {/* Toggle button for sidebar on mobile */}
+                <div className="bg-white p-4 border-b border-gray-200 flex items-center lg:hidden">
+                    <button onClick={toggleSidebar} className="text-gray-800 focus:outline-none p-2 mr-4">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <h2 className="text-lg font-semibold text-gray-800">{currentSession ? currentSession.title : t('dashboardPage.selectSessionPrompt')}</h2>
+                </div>
+
+                <div className="flex-grow p-3 sm:p-4">
                     {currentSession ? (
-                        <div className="flex flex-col h-full"> {/* Make this a flex column */}
-                            <ChatWindow key={currentSession._id} sessionId={currentSession._id} /> {/* Add key prop */}
+                        <div className="flex flex-col h-full">
+                            <ChatWindow key={currentSession._id} sessionId={currentSession._id} />
                             {sessionEvaluation && (
-                                <div className="mt-4 p-4 bg-yellow-100 border border-yellow-400 rounded-lg">
-                                    <h4 className="font-bold text-lg mb-2">{t('dashboardPage.chatEvaluation')}</h4>
+                                <div className="mt-4 p-3 sm:p-4 bg-yellow-100 border border-yellow-400 rounded-lg text-sm sm:text-base">
+                                    <h4 className="font-bold text-base sm:text-lg mb-2">{t('dashboardPage.chatEvaluation')}</h4>
                                     <p>{t('dashboardPage.rating')} {'★'.repeat(sessionEvaluation.rating)}{'☆'.repeat(5 - sessionEvaluation.rating)}</p>
                                     {sessionEvaluation.comment && <p>{t('dashboardPage.comment')} {sessionEvaluation.comment}</p>}
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center h-full text-gray-500 text-lg">
+                        <div className="flex items-center justify-center h-full text-gray-500 text-base sm:text-lg">
                             {t('dashboardPage.selectSessionPrompt')}
                         </div>
                     )}
                 </div>
                 {currentSession && (
-                    <div className="p-4 bg-gray-100 border-t border-gray-200 flex justify-end">
+                    <div className="p-3 sm:p-4 bg-gray-100 border-t border-gray-200 flex justify-end">
                         <button
                             onClick={handleEndChat}
-                            className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+                            className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded text-base"
                         >
                             {t('dashboardPage.endChatEvaluate')}
                         </button>
