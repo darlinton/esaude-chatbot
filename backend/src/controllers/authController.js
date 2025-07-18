@@ -80,10 +80,11 @@ const googleAuthCallback = async (req, res) => {
             _id: req.user._id,
             displayName: req.user.displayName,
             email: req.user.email,
-            token
+            token: token,
         };
 
-        res.redirect('/dashboard');
+        // Redirect the user to the dashboard with a 302 status code
+        res.status(302).redirect('/dashboard');
     } catch (error) {
         console.error('Google authentication callback error:', error);
         res.status(500).json({ message: 'Error handling Google authentication callback' });
