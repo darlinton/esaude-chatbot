@@ -10,16 +10,7 @@ module.exports = (app) => {
     passport.authenticate('google', { session: false }),
     (req, res) => {
       console.log('Google authentication callback called');
-      const token = authController.generateToken(req.user._id);
-      console.log('Token generated:', token);
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 3600000, // 1 hour
-      });
-      console.log('Cookie set');
       res.redirect('/dashboard');
-      console.log('Redirecting to /dashboard');
     }
   );
 
