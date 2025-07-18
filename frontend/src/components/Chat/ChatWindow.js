@@ -38,8 +38,8 @@ const ChatWindow = ({ sessionId }) => {
                     value={selectedBot}
                     onChange={(e) => setSelectedBot(e.target.value)}
                 >
-                    <option value="openai">OpenAI</option>
-                    <option value="gemini">Gemini</option>
+                    <option value="openai">ImunoAjudaMG (gpt-4o-mini)</option>
+                    <option value="gemini">ImunoAjudaMG (gemini-1.5-flash)</option>
                     <option value="replay">Replay</option>
                 </select>
             </div>
