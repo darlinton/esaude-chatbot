@@ -8,6 +8,7 @@ import SignUpPage from './pages/SignUpPage';
 import DashboardPage from './pages/DashboardPage';
 import HistoryPage from './pages/HistoryPage'; // Although it redirects, keep it for route definition
 import AboutPage from './pages/AboutPage';
+import GoogleAuthCallback from './components/Auth/GoogleAuthCallback';
 import Spinner from './components/Common/Spinner';
 
 const PrivateRoute = ({ children }) => {
@@ -28,6 +29,7 @@ function App() {
                     <Navbar />
                     <main>
                         <Routes>
+                            <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/signup" element={<SignUpPage />} />
                             <Route
