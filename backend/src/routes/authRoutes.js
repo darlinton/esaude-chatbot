@@ -7,10 +7,17 @@ module.exports = (app) => {
   app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
   app.get(
     '/api/auth/google/callback',
-    passport.authenticate('google'),
-      (req, res) => {
-          res.redirect('/dashboard');
-        });
+    passport.authenticate('google', { session: false }),
+    (req, res) => {
+      const token = authController.generateToken(req.user._id);
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 3600000, // 1 hour
+      });
+      res.redirect('/dashboard');
+    }
+  );
 
   app.get('/api/logout', (req, res) => {
     req.logout((err) => {
