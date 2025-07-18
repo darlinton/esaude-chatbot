@@ -6,6 +6,7 @@ module.exports = (app) => {
   app.post('/api/auth/login', authController.login);
   app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
   app.get('/api/auth/google/callback', passport.authenticate('google'), authController.googleAuthCallback);
+  app.get('/api/auth/session', authController.getSession);
 
   app.get('/api/logout', (req, res) => {
     req.logout((err) => {

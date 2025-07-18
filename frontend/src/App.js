@@ -29,7 +29,7 @@ function App() {
                     <Navbar />
                     <main>
                         <Routes>
-                            <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
+                            <Route path="/auth/google/success" element={<GoogleAuthCallback />} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/signup" element={<SignUpPage />} />
                             <Route

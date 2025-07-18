@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const session = require('express-session'); // Import express-session
 const passport = require('passport');
+const cookieParser = require('cookie-parser');
 require('./src/models/User'); // Ensure User model is loaded before passport
 require('./src/services/passport'); // Passport configuration
 
@@ -30,6 +31,7 @@ app.use(cors({
     credentials: true,
 }));
 app.use(express.json()); // Body parser
+app.use(cookieParser());
 
 app.use(
     session({

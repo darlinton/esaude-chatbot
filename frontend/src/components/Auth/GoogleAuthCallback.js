@@ -1,33 +1,30 @@
 import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import API from '../../api';
 
 const GoogleAuthCallback = () => {
     const { handleGoogleLogin } = useAuth();
-    const location = useLocation();
     const navigate = useNavigate();
 
     useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const token = params.get('token');
-        const id = params.get('id');
-        const displayName = params.get('displayName');
-        const email = params.get('email');
+        const fetchSession = async () => {
+            try {
+                const { data } = await API.get('/auth/session');
+                if (data) {
+                    handleGoogleLogin(data);
+                    navigate('/dashboard');
+                } else {
+                    navigate('/login');
+                }
+            } catch (error) {
+                console.error('Error fetching session:', error);
+                navigate('/login');
+            }
+        };
 
-        if (token && id && displayName && email) {
-            const userData = {
-                _id: id,
-                displayName,
-                email,
-                token,
-            };
-            handleGoogleLogin(userData);
-            navigate('/dashboard');
-        } else {
-            // Handle error or redirect to login
-            navigate('/login');
-        }
-    }, [handleGoogleLogin, location.search, navigate]);
+        fetchSession();
+    }, [handleGoogleLogin, navigate]);
 
     return <div>Loading...</div>;
 };

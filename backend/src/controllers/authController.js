@@ -75,17 +75,36 @@ const googleAuthCallback = async (req, res) => {
         // Create a JWT token for the user
         const token = generateToken(req.user._id);
 
-        // Redirect to the frontend with the token and user info in the query string
-        const user = req.user;
-        res.redirect(`/auth/google/callback?token=${token}&id=${user._id}&displayName=${user.displayName}&email=${user.email}`);
+        // Set the token in an HTTP-only cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
+        });
+
+        res.redirect('/auth/google/success');
     } catch (error) {
         console.error('Google authentication callback error:', error);
         res.status(500).json({ message: 'Error handling Google authentication callback' });
     }
 };
 
+const getSession = async (req, res) => {
+    if (req.user) {
+        res.json({
+            _id: req.user.id,
+            displayName: req.user.displayName,
+            email: req.user.email,
+            token: req.cookies.token,
+        });
+    } else {
+        res.status(401).json({ message: 'Not authenticated' });
+    }
+};
+
 module.exports = {
     signup: signupUser,
     login: loginUser,
-    googleAuthCallback
+    googleAuthCallback,
+    getSession,
 };
