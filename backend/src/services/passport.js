@@ -42,8 +42,7 @@ passport.use(
                 const newUser = await new User({
                     googleId: profile.id,
                     displayName: profile.displayName,
-                    email: profile.emails[0].value,
-                    photo: profile.photos[0].value
+                    email: profile.emails[0].value
                 }).save();
                 done(null, newUser);
             } catch (error) {
