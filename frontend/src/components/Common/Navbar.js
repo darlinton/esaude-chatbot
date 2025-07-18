@@ -14,8 +14,8 @@ const Navbar = () => {
 
     return (
         <nav className="bg-gray-800 p-4 text-white">
-            <div className="container mx-auto flex justify-between items-center">
-                <Link to="/" className="text-2xl font-bold" title={t('navbar.titleTooltip')}>{t('navbar.title')}</Link>
+            <div className="container mx-auto flex justify-between items-center relative">
+                {/* Hamburger button - stays left */}
                 <div className="block lg:hidden">
                     <button onClick={toggleMenu} className="text-white focus:outline-none">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -23,8 +23,20 @@ const Navbar = () => {
                         </svg>
                     </button>
                 </div>
-                <div className={`w-full lg:flex lg:items-center lg:w-auto ${isOpen ? 'block' : 'hidden'}`}>
-                    <div className="text-sm lg:flex-grow">
+                {/* App name - stays right */}
+                <Link to="/" className="text-2xl font-bold" title={t('navbar.titleTooltip')}>{t('navbar.title')}</Link>
+
+                {/* Mobile menu content - positioned absolutely */}
+                <div className={`fixed inset-y-0 left-0 w-64 bg-gray-700 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out z-50 lg:relative lg:flex lg:w-auto lg:translate-x-0 lg:bg-transparent lg:items-center lg:ml-auto`}>
+                    <div className="text-sm lg:flex-grow p-4">
+                        {/* Close button for mobile menu - on the left */}
+                        <div className="flex justify-start mb-4 lg:hidden">
+                            <button onClick={toggleMenu} className="text-white focus:outline-none">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
                         {user ? (
                             <>
                                 <span className="block mt-4 lg:inline-block lg:mt-0 mr-4">{t('navbar.welcome', { displayName: user.displayName })}</span>
