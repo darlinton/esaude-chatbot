@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useChat } from '../context/ChatContext';
 import ChatWindow from '../components/Chat/ChatWindow';
@@ -74,19 +75,21 @@ const DashboardPage = () => {
         fetchChatSessions(); // Re-fetch sessions to update any new evaluations
     };
 
+    const { t } = useTranslation();
+
     if (authLoading) return <Spinner />;
-    if (!user) return <div className="text-center p-4">Please log in to view this page.</div>;
+    if (!user) return <div className="text-center p-4">{t('dashboardPage.loginPrompt')}</div>;
 
     return (
         <div className="flex h-screen bg-gray-100">
             {/* Sidebar for chat sessions */}
             <div className="w-1/4 bg-white p-4 border-r border-gray-200 flex flex-col">
-                <h3 className="text-xl font-bold mb-4">Your Chat Sessions</h3>
+                <h3 className="text-xl font-bold mb-4">{t('dashboardPage.yourChatSessions')}</h3>
                 <button
                     onClick={handleStartNewChat}
                     className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4 w-full"
                 >
-                    Start New Chat
+                    {t('dashboardPage.startNewChat')}
                 </button>
                 <div className="flex-grow overflow-y-auto">
                     {chatLoading ? (
@@ -116,15 +119,15 @@ const DashboardPage = () => {
                             <ChatWindow key={currentSession._id} sessionId={currentSession._id} /> {/* Add key prop */}
                             {sessionEvaluation && (
                                 <div className="mt-4 p-4 bg-yellow-100 border border-yellow-400 rounded-lg">
-                                    <h4 className="font-bold text-lg mb-2">Chat Evaluation:</h4>
-                                    <p>Rating: {'★'.repeat(sessionEvaluation.rating)}{'☆'.repeat(5 - sessionEvaluation.rating)}</p>
-                                    {sessionEvaluation.comment && <p>Comment: {sessionEvaluation.comment}</p>}
+                                    <h4 className="font-bold text-lg mb-2">{t('dashboardPage.chatEvaluation')}</h4>
+                                    <p>{t('dashboardPage.rating')} {'★'.repeat(sessionEvaluation.rating)}{'☆'.repeat(5 - sessionEvaluation.rating)}</p>
+                                    {sessionEvaluation.comment && <p>{t('dashboardPage.comment')} {sessionEvaluation.comment}</p>}
                                 </div>
                             )}
                         </div>
                     ) : (
                         <div className="flex items-center justify-center h-full text-gray-500 text-lg">
-                            Select a chat session or start a new one.
+                            {t('dashboardPage.selectSessionPrompt')}
                         </div>
                     )}
                 </div>
@@ -134,7 +137,7 @@ const DashboardPage = () => {
                             onClick={handleEndChat}
                             className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
                         >
-                            End Chat & Evaluate
+                            {t('dashboardPage.endChatEvaluate')}
                         </button>
                     </div>
                 )}

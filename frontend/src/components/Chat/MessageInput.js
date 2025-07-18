@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const MessageInput = ({ onSendMessage, disabled }) => {
+    const { t } = useTranslation();
     const [content, setContent] = useState('');
 
     const handleSubmit = (e) => {
@@ -16,7 +18,7 @@ const MessageInput = ({ onSendMessage, disabled }) => {
             <input
                 type="text"
                 className="flex-grow p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Type your message..."
+                placeholder={t('messageInput.placeholder')}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 disabled={disabled}
@@ -26,7 +28,7 @@ const MessageInput = ({ onSendMessage, disabled }) => {
                 className="ml-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline disabled:opacity-50"
                 disabled={disabled}
             >
-                Send
+                {t('messageInput.sendButton')}
             </button>
         </form>
     );

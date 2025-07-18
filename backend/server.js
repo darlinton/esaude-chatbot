@@ -50,7 +50,7 @@ mongoose.connect(process.env.MONGO_URI)
 // Routes
 require('./src/routes/authRoutes')(app); // Pass the app object to authRoutes
 
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 app.use('/api/chats', require('./src/routes/chatRoutes'));
 app.use('/api/messages', require('./src/routes/messageRoutes'));

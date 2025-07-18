@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import DashboardPage from './pages/DashboardPage';
 import HistoryPage from './pages/HistoryPage'; // Although it redirects, keep it for route definition
+import AboutPage from './pages/AboutPage';
 import Spinner from './components/Common/Spinner';
 
 const PrivateRoute = ({ children }) => {
@@ -45,6 +46,7 @@ function App() {
                                     </PrivateRoute>
                                 }
                             />
+                            <Route path="/about" element={<AboutPage />} />
                             <Route path="/" element={<Navigate to="/dashboard" />} />
                         </Routes>
                     </main>

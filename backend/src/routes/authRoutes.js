@@ -5,7 +5,7 @@ module.exports = (app) => {
   app.post('/api/auth/signup', authController.signup);
   app.post('/api/auth/login', authController.login);
   app.get(
-    '/auth/google/callback',
+    '/api/auth/google/callback',
     passport.authenticate('google'),
     (req, res) => {
       res.redirect('/dashboard');

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useChat } from '../../context/ChatContext';
 
 const EvaluationForm = ({ sessionId, onClose }) => {
+    const { t } = useTranslation();
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     const [message, setMessage] = useState('');
@@ -11,27 +13,27 @@ const EvaluationForm = ({ sessionId, onClose }) => {
         e.preventDefault();
         setMessage('');
         if (rating === 0) {
-            setMessage('Please select a rating.');
+            setMessage(t('evaluationForm.selectRating'));
             return;
         }
 
         const result = await submitEvaluation(sessionId, rating, comment);
         if (result.success) {
-            setMessage('Evaluation submitted successfully!');
+            setMessage(t('evaluationForm.evaluationSuccess'));
             setTimeout(onClose, 1500); // Close form after a short delay
         } else {
-            setMessage(result.message || 'Failed to submit evaluation.');
+            setMessage(result.message || t('evaluationForm.evaluationFailed'));
         }
     };
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
             <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-4 text-center">Rate Chat Session</h2>
-                {message && <p className={`text-center mb-4 ${message.includes('successfully') ? 'text-green-500' : 'text-red-500'}`}>{message}</p>}
+                <h2 className="text-2xl font-bold mb-4 text-center">{t('evaluationForm.rateChatSession')}</h2>
+                {message && <p className={`text-center mb-4 ${message.includes(t('evaluationForm.evaluationSuccess')) ? 'text-green-500' : 'text-red-500'}`}>{message}</p>}
                 <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2">
-                        Rating:
+                        {t('evaluationForm.ratingLabel')}
                     </label>
                     <div className="flex justify-center space-x-2">
                         {[1, 2, 3, 4, 5].map((star) => (
@@ -48,7 +50,7 @@ const EvaluationForm = ({ sessionId, onClose }) => {
                 </div>
                 <div className="mb-6">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="comment">
-                        Comment (Optional):
+                        {t('evaluationForm.commentLabel')}
                     </label>
                     <textarea
                         id="comment"
@@ -64,14 +66,14 @@ const EvaluationForm = ({ sessionId, onClose }) => {
                         type="submit"
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     >
-                        Submit Evaluation
+                        {t('evaluationForm.submitEvaluation')}
                     </button>
                     <button
                         type="button"
                         onClick={onClose}
                         className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     >
-                        Cancel
+                        {t('evaluationForm.cancelButton')}
                     </button>
                 </div>
             </form>

@@ -1,0 +1,64 @@
+{
+  "loginForm": {
+    "emailLabel": "Email address",
+    "passwordLabel": "Password",
+    "loginButton": "Login",
+    "signupPrompt": "Don't have an account?",
+    "signupLink": "Sign Up",
+    "orSeparator": "Or",
+    "continueWithGoogle": "Continue with Google"
+  },
+  "signupForm": {
+    "signupTitle": "Sign Up",
+    "usernameLabel": "Username",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "signupButton": "Sign Up",
+    "loginPrompt": "Already have an account?",
+    "loginLink": "Login"
+  },
+  "dashboardPage": {
+    "loginPrompt": "Please log in to view this page.",
+    "yourChatSessions": "Your Chat Sessions",
+    "startNewChat": "Start New Chat",
+    "selectSessionPrompt": "Select a chat session or start a new one.",
+    "endChatEvaluate": "Evaluate",
+    "chatEvaluation": "Chat Evaluation:",
+    "rating": "Rating:",
+    "comment": "Comment:"
+  },
+  "navbar": {
+    "title": "eSaúdeZap",
+    "titleTooltip": "Instantaneous care, always accessible.",
+    "welcome": "Welcome, {{displayName}}!",
+    "logoutButton": "Logout",
+    "loginButton": "Login",
+    "dashboardLink": "Dashboard",
+    "historyLink": "History",
+    "aboutLink": "About"
+  },
+  "chatWindow": {
+    "chatWith": "Chat with:",
+    "startTyping": "Start typing to begin your chat!"
+  },
+  "messageInput": {
+    "placeholder": "Type your message...",
+    "sendButton": "Send"
+  },
+  "evaluationForm": {
+    "rateChatSession": "Rate Chat Session",
+    "selectRating": "Please select a rating.",
+    "evaluationSuccess": "Evaluation submitted successfully!",
+    "evaluationFailed": "Failed to submit evaluation.",
+    "ratingLabel": "Rating:",
+    "commentLabel": "Comment (Optional):",
+    "submitEvaluation": "Submit Evaluation",
+    "cancelButton": "Cancel"
+  },
+  "aboutPage": {
+    "title": "About eSaúdeZap",
+    "description1": "eSaúdeZap is an innovative chatbot platform designed to provide instantaneous and accessible healthcare information and support.",
+    "description2": "Our mission is to empower users with reliable health knowledge and facilitate quick access to medical guidance through an intuitive chat interface. You can contact us at darlinton (at) ufsj.edu.br if needed.",
+    "version": "Version: {{version}} (prototype)"
+  }
+}

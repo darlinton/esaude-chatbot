@@ -1,0 +1,64 @@
+{
+  "loginForm": {
+    "emailLabel": "Endereço de e-mail",
+    "passwordLabel": "Senha",
+    "loginButton": "Entrar",
+    "signupPrompt": "Não tem uma conta?",
+    "signupLink": "Cadastre-se",
+    "orSeparator": "Ou",
+    "continueWithGoogle": "Continuar com o Google"
+  },
+  "signupForm": {
+    "signupTitle": "Cadastre-se",
+    "usernameLabel": "Nome de usuário",
+    "emailLabel": "E-mail",
+    "passwordLabel": "Senha",
+    "signupButton": "Cadastre-se",
+    "loginPrompt": "Já tem uma conta?",
+    "loginLink": "Entrar"
+  },
+  "dashboardPage": {
+    "loginPrompt": "Por favor, faça login para ver esta página.",
+    "yourChatSessions": "Suas Sessões de Chat",
+    "startNewChat": "Iniciar Novo Chat",
+    "selectSessionPrompt": "Selecione uma sessão de chat ou inicie uma nova.",
+    "endChatEvaluate": "Avaliar",
+    "chatEvaluation": "Avaliação do Chat:",
+    "rating": "Avaliação:",
+    "comment": "Comentário:"
+  },
+  "navbar": {
+    "title": "eSaúdeZap",
+    "titleTooltip": "Atendimento instantâneo, cuidado sempre acessível.",
+    "welcome": "Bem-vindo(a), {{displayName}}!",
+    "logoutButton": "Sair",
+    "loginButton": "Entrar",
+    "dashboardLink": "Painel",
+    "historyLink": "Histórico",
+    "aboutLink": "Sobre"
+  },
+  "chatWindow": {
+    "chatWith": "Conversar com:",
+    "startTyping": "Comece a digitar para iniciar seu chat!"
+  },
+  "messageInput": {
+    "placeholder": "Digite sua mensagem...",
+    "sendButton": "Enviar"
+  },
+  "evaluationForm": {
+    "rateChatSession": "Avaliar Sessão de Chat",
+    "selectRating": "Por favor, selecione uma avaliação.",
+    "evaluationSuccess": "Avaliação enviada com sucesso!",
+    "evaluationFailed": "Falha ao enviar avaliação.",
+    "ratingLabel": "Avaliação:",
+    "commentLabel": "Comentário (Opcional):",
+    "submitEvaluation": "Enviar Avaliação",
+    "cancelButton": "Cancelar"
+  },
+  "aboutPage": {
+    "title": "Sobre o eSaúdeZap",
+    "description1": "eSaúdeZap é uma plataforma inovadora de chatbot projetada para fornecer informações e suporte de saúde instantâneos e acessíveis.",
+    "description2": "Nossa missão é capacitar os usuários com conhecimento de saúde confiável e facilitar o acesso rápido a orientações médicas através de uma interface de chat intuitiva. Você pode nos contatar em darlinton (at) ufsj.edu.br se necessário.",
+    "version": "Versão: {{version}} (protótipo)"
+  }
+}

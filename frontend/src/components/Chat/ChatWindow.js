@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Message from './Message';
 import MessageInput from './MessageInput';
 import Spinner from '../Common/Spinner';
@@ -23,13 +24,15 @@ const ChatWindow = ({ sessionId }) => {
         await sendMessage(sessionId, content, selectedBot);
     };
 
+    const { t } = useTranslation();
+
     if (loading) return <Spinner />;
     if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
     return (
         <div className="flex flex-col flex-1 bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-800">Chat with:</h2>
+                <h2 className="text-lg font-semibold text-gray-800">{t('chatWindow.chatWith')}</h2>
                 <select
                     className="p-2 border border-gray-300 rounded-md"
                     value={selectedBot}
@@ -42,7 +45,7 @@ const ChatWindow = ({ sessionId }) => {
             </div>
             <div className="flex-grow p-4 overflow-y-auto">
                 {messages.length === 0 ? (
-                    <div className="text-center text-gray-500 mt-10">Start typing to begin your chat!</div>
+                    <div className="text-center text-gray-500 mt-10">{t('chatWindow.startTyping')}</div>
                 ) : (
                     messages.map((msg) => (
                         <Message key={msg._id} message={msg} />
