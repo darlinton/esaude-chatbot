@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "install:backend": "cd backend && npm install",
-    "install:frontend": "cd frontend && npm install",
+    "install:frontend": "cd frontend && npm pm install --legacy-peer-deps",
     "install": "npm run install:backend && npm run install:frontend",
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
