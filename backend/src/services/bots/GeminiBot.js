@@ -83,7 +83,7 @@ class GeminiBot extends BotInterface {
       throw new Error('Gemini API key is not provided.');
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
   }
 
   /**
@@ -108,14 +108,33 @@ class GeminiBot extends BotInterface {
       const chat = this.model.startChat({
         history: messages,
         generationConfig: {
-          maxOutputTokens: 200,
+          maxOutputTokens: 240,
         },
       });
 
       const result = await chat.sendMessage(prompt);
       const response = await result.response;
       const text = response.text();
-      return text || 'Desculpe, não consegui gerar uma resposta no momento. Por favor, tente novamente.';
+
+      if (text) {
+        return text;
+      }
+      
+      // If text is empty, try to extract more details from the response object
+      let errorMessage = 'Desculpe, não consegui gerar uma resposta no momento.';
+        
+      if (response.promptFeedback && response.promptFeedback.blockReason) {
+        errorMessage += ` Motivo: Conteúdo bloqueado por ${response.promptFeedback.blockReason}.`;
+      } else if (response.candidates && response.candidates.length > 0 && response.candidates[0].finishReason) {
+          errorMessage += ` Motivo: Geração finalizada com razão: ${response.candidates[0].finishReason}.`;
+      } else {
+        errorMessage += ` Nenhuma resposta textual válida foi gerada.`;
+      }
+        
+      // Log the full response for debugging purposes
+      console.error('Gemini response without text:', response); 
+        
+      return errorMessage + ' Por favor, tente novamente.';
     } catch (error) {
       console.error('Error generating response from Gemini:', error);
       throw error;
