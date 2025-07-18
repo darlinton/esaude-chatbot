@@ -45,6 +45,7 @@ passport.use(
                     email: profile.emails[0].value,
                     photo: profile.photos[0].value
                 }).save();
+                done(null, newUser);
             } catch (error) {
                 // Catch any errors that occur during the database operations (findOne or save)
                 console.error("Error during Google OAuth user processing:", error);
@@ -52,7 +53,6 @@ passport.use(
                 // This typically results in an authentication failure.
                 done(error, null); 
             }
-            done(null, newUser);
         }
     )
 );

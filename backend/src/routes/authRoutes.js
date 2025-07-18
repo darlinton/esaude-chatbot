@@ -4,13 +4,13 @@ const authController = require('../controllers/authController');
 module.exports = (app) => {
   app.post('/api/auth/signup', authController.signup);
   app.post('/api/auth/login', authController.login);
+  app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
   app.get(
     '/api/auth/google/callback',
     passport.authenticate('google'),
-    (req, res) => {
-      res.redirect('/dashboard');
-    }
-  );
+      (req, res) => {
+          res.redirect('/dashboard');
+        });
 
   app.get('/api/logout', (req, res) => {
     req.logout((err) => {
