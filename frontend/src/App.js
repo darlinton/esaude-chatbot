@@ -9,6 +9,8 @@ import DashboardPage from './pages/DashboardPage';
 import HistoryPage from './pages/HistoryPage'; // Although it redirects, keep it for route definition
 import AboutPage from './pages/AboutPage';
 import GoogleAuthCallback from './components/Auth/GoogleAuthCallback';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminSessionDetailPage from './pages/AdminSessionDetailPage';
 import Spinner from './components/Common/Spinner';
 
 const PrivateRoute = ({ children }) => {
@@ -19,6 +21,16 @@ const PrivateRoute = ({ children }) => {
     }
 
     return user ? children : <Navigate to="/login" />;
+};
+
+const AdminRoute = ({ children }) => {
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return <Spinner />;
+    }
+
+    return user && user.role === 'admin' ? children : <Navigate to="/login" />;
 };
 
 function App() {
@@ -49,6 +61,22 @@ function App() {
                                 }
                             />
                             <Route path="/about" element={<AboutPage />} />
+                            <Route
+                                path="/admin/sessions"
+                                element={
+                                    <AdminRoute>
+                                        <AdminDashboardPage />
+                                    </AdminRoute>
+                                }
+                            />
+                            <Route
+                                path="/admin/sessions/:sessionId"
+                                element={
+                                    <AdminRoute>
+                                        <AdminSessionDetailPage />
+                                    </AdminRoute>
+                                }
+                            />
                             <Route path="/" element={<Navigate to="/dashboard" />} />
                         </Routes>
                     </main>

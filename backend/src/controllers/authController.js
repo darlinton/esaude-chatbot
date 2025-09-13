@@ -25,21 +25,27 @@ const signupUser = async (req, res) => {
     }
 
     // Create user
-    const user = await User.create({
-        displayName,
-        email,
-        password,
-    });
-
-    if (user) {
-        res.status(201).json({
-            _id: user.id,
-            displayName: user.displayName,
-            email: user.email,
-            token: generateToken(user._id),
+    try {
+        const user = await User.create({
+            displayName,
+            email,
+            password,
         });
-    } else {
-        res.status(400).json({ message: 'Invalid user data' });
+
+        if (user) {
+            res.status(201).json({
+                _id: user.id,
+                displayName: user.displayName,
+                email: user.email,
+                role: user.role,
+                token: generateToken(user._id),
+            });
+        } else {
+            res.status(400).json({ message: 'Invalid user data' });
+        }
+    } catch (error) {
+        console.error('Signup error:', error);
+        res.status(500).json({ message: 'Server error during signup' });
     }
 };
 
@@ -57,6 +63,7 @@ const loginUser = async (req, res) => {
             _id: user.id,
             displayName: user.displayName,
             email: user.email,
+            role: user.role,
             token: generateToken(user._id),
         });
     } else {

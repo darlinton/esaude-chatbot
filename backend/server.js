@@ -55,6 +55,7 @@ require('./src/routes/authRoutes')(app); // Pass the app object to authRoutes
 app.use('/api/chats', require('./src/routes/chatRoutes'));
 app.use('/api/messages', require('./src/routes/messageRoutes'));
 app.use('/api/evaluations', require('./src/routes/evaluationRoutes'));
+app.use('/api/admin', require('./src/routes/adminRoutes')); // Admin routes
 
 app.get('/', (req, res) => {
     res.send('API is running...');
