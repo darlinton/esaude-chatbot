@@ -34,6 +34,26 @@ const AdminDashboardPage = () => {
         }
     };
 
+    const handleExportJson = async () => {
+        try {
+            const response = await api.get('/admin/sessions/export/json', { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'chat_sessions.json');
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        } catch (err) {
+            console.error('Error exporting sessions to JSON:', err);
+            if (err.response && err.response.status === 404) {
+                setError('No chat sessions found to export.');
+            } else {
+                setError('Failed to export sessions to JSON.');
+            }
+        }
+    };
+
     const handleExport = async () => {
         try {
             const response = await api.get('/admin/sessions/export', { responseType: 'blob' });
@@ -65,17 +85,23 @@ const AdminDashboardPage = () => {
     return (
         <div className="container mx-auto p-4">
             <h1 className="text-3xl font-bold mb-6 text-center">Admin Dashboard - User Sessions</h1>
-            <div className="flex justify-between items-center mb-4">
-                <div>
-                </div>
-                <button
-                    onClick={handleExport}
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    Export to CSV
-                </button>
-            </div>
-            {sessions.length === 0 ? (
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                        </div>
+                        <button
+                            onClick={handleExportJson}
+                            className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded mr-2"
+                        >
+                            Export to JSON
+                        </button>
+                        <button
+                            onClick={handleExport}
+                            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                            Export to CSV
+                        </button>
+                    </div>
+                    {sessions.length === 0 ? (
                 <p className="text-center text-gray-600">No user sessions found.</p>
             ) : (
                 <div className="overflow-x-auto">

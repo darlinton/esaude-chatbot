@@ -325,3 +325,28 @@ exports.exportChatSessions = async (req, res) => {
     }
     
 };
+// @desc    Export chat sessions to JSON
+// @route   GET /api/admin/sessions/export/json
+// @access  Admin
+exports.exportChatSessionsJson = async (req, res) => {
+    try {
+        const sessions = await ChatSession.find()
+            .populate('user', 'displayName email')
+            .populate({
+                path: 'messages',
+                options: { sort: 'timestamp' }
+            })
+            .sort({ createdAt: -1 });
+
+        if (!sessions || sessions.length === 0) {
+            return res.status(404).json({ message: 'No chat sessions found to export.' });
+        }
+
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename=chat_sessions.json');
+        res.status(200).json(sessions);
+    } catch (error) {
+        console.error('Error exporting chat sessions to JSON:', error);
+        res.status(500).json({ message: 'Server error exporting chat sessions to JSON' });
+    }
+};

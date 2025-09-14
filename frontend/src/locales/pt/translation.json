@@ -37,7 +37,7 @@
     "historyLink": "Histórico",
     "aboutLink": "Sobre",
     "adminPromptManagement": "Admin-Prompts",
-    "adminApiKeyManagement": "Admin-APIKeys",
+    "adminApiKeyManagement": "Admin-API-Keys",
     "adminSessionManagement": "Admin-Sessões"
   },
   "chatWindow": {
