@@ -12,7 +12,8 @@ const {
     deleteBotPrompt,
     setDefaultBotPrompt,
     getAllBotApiKeys,
-    updateBotApiKey
+    updateBotApiKey,
+    getSessionDetails
 } = require('../controllers/adminController');
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.route('/upgrade-user').post(protect, authorize('admin'), upgradeUserToAdm
 router.route('/sessions').get(protect, authorize('admin'), getAllUserSessions);
 router.route('/sessions/:sessionId/messages').get(protect, authorize('admin'), getSessionMessages);
 router.route('/sessions/:sessionId/evaluations').get(protect, authorize('admin'), getSessionEvaluations);
+router.route('/sessions/:sessionId').get(protect, authorize('admin'), getSessionDetails);
 
 // Bot Prompt Management Routes
 router.route('/prompts')

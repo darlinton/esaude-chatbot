@@ -24,17 +24,17 @@ This document provides a summary list of all major features implemented or plann
     *   **Status**: Completed
     *   **Detailed Spec**: [feature-evaluation-system.md](features/feature-evaluation-system.md)
 
+5.  **Multi-language Support**
+    *   **Description**: Allows the chatbot to interact with users in multiple languages.
+    *   **Status**: Completed
+    *   **Detailed Spec**: [feature-multi-language-support.md](features/feature-multi-language-support.md)
+
 ## Planned Features
 
-5.  **Knowledge Base Integration**
+6.  **Knowledge Base Integration**
     *   **Description**: Integration with a comprehensive healthcare knowledge base to enhance chatbot accuracy and breadth of information.
     *   **Status**: Planned
     *   **Detailed Spec**: [feature-knowledge-base-integration.md](features/feature-knowledge-base-integration.md)
-
-6.  **Multi-language Support**
-    *   **Description**: Allows the chatbot to interact with users in multiple languages.
-    *   **Status**: Planned
-    *   **Detailed Spec**: [feature-multi-language-support.md](features/feature-multi-language-support.md)
 
 7.  **Appointment Scheduling Integration**
     *   **Description**: Enables users to schedule appointments with healthcare providers directly through the chatbot.

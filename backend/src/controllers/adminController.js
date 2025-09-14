@@ -28,12 +28,40 @@ exports.upgradeUserToAdmin = async (req, res) => {
     }
 };
 
+// @desc    Get session details for a specific session
+// @route   GET /api/admin/sessions/:sessionId
+// @access  Admin
+exports.getSessionDetails = async (req, res) => {
+    try {
+        const { sessionId } = req.params;
+
+        const session = await ChatSession.findById(sessionId).populate('user', 'displayName email').select('-_id -__v');
+        if (!session) {
+            return res.status(404).json({ message: 'Session not found' });
+        }
+
+        const messages = await Message.find({ session: sessionId }).sort('timestamp');
+        const evaluations = await Evaluation.find({ session: sessionId });
+
+        const sessionDetails = {
+            ...session.toObject(),
+            messages,
+            evaluations,
+        };
+
+        res.status(200).json(sessionDetails);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 // @desc    Get all user sessions
 // @route   GET /api/admin/sessions
 // @access  Admin
 exports.getAllUserSessions = async (req, res) => {
     try {
-        const sessions = await ChatSession.find().populate('user', 'displayName email');
+        const sessions = await ChatSession.find().populate('user', 'displayName email').sort({ createdAt: -1 });
         res.status(200).json(sessions);
     } catch (error) {
         console.error(error);

@@ -7,11 +7,13 @@ const { getBot } = require('../services/bots/BotManager');
 // @route   POST /api/chats
 // @access  Private
 const createChatSession = async (req, res) => {
-    const { title, botType, promptId } = req.body; // Accept botType and promptId
+    // Safely get properties from req.body, defaulting to an empty object if req.body is null or undefined
+    const { title, botType, promptId } = req.body || {};
 
     try {
-        let selectedPromptId = promptId;
-        const sessionBotType = botType || 'openai'; // Default to 'openai' if not provided
+      const newTitle = title || 'New Chat';  
+      let selectedPromptId = promptId;
+      const sessionBotType = botType || 'openai'; // Default to 'openai' if not provided
 
         // If no promptId is provided, find the default prompt for the sessionBotType
         if (!selectedPromptId && sessionBotType) {
@@ -23,7 +25,7 @@ const createChatSession = async (req, res) => {
 
         const chatSession = await ChatSession.create({
             user: req.user.id,
-            title: title || 'New Chat',
+            title: newTitle,
             botType: sessionBotType, // Store the selected bot type
             promptId: selectedPromptId // Assign the selected prompt ID
         });
@@ -53,13 +55,21 @@ const getChatSessionById = async (req, res) => {
         const chatSession = await ChatSession.findById(req.params.id).populate('messages');
 
         if (!chatSession) {
+            console.log(`[getChatSessionById] Chat session ${req.params.id} not found.`);
             return res.status(404).json({ message: 'Chat session not found' });
         }
 
+        console.log(`[getChatSessionById] User ID from token: ${req.user.id}`);
+        console.log(`[getChatSessionById] Chat session owner ID: ${chatSession.user.toString()}`);
+        console.log(`[getChatSessionById] User role: ${req.user.role}`);
+
         // Ensure the session belongs to the logged-in user
         if (chatSession.user.toString() !== req.user.id) {
+            console.log(`[getChatSessionById] Authorization failed: Session owner (${chatSession.user.toString()}) does not match logged-in user (${req.user.id}).`);
             return res.status(403).json({ message: 'Not authorized to view this chat session' });
         }
+
+        console.log(`[getChatSessionById] Authorization successful for session ${req.params.id}.`);
 
         res.status(200).json(chatSession);
     } catch (error) {
@@ -90,9 +100,14 @@ const sendMessage = async (req, res) => {
     await userMessage.save();
     chatSession.messages.push(userMessage._id);
 
+    // Update botType if it has changed
+    if (botType && chatSession.botType !== botType) {
+      chatSession.botType = botType;
+    }
+
     const history = await Message.find({ session: chatSession._id }).sort('timestamp');
     
-    const bot = await getBot(botType, chatSession.promptId); // Pass promptId (ObjectId) to getBot
+    const bot = await getBot(botType, chatSession.promptId);
     const botResponseContent = await bot.generateResponse(content, history);
 
     const botMessage = new Message({
@@ -107,6 +122,10 @@ const sendMessage = async (req, res) => {
     // Update chat session title only after the first message and bot reply
     if (chatSession.messages.length === 2) {
       await updateChatSessionTitle(chatSession, botType);
+      // Fetch the session again to get the updated title
+      const updatedSession = await ChatSession.findById(sessionId);
+      res.status(200).json({ userMessage, botMessage, sessionId: chatSession._id, sessionTitle: updatedSession.title });
+      return; // Exit after sending the response with the new title
     }
 
     res.status(200).json({ userMessage, botMessage, sessionId: chatSession._id });
@@ -127,17 +146,14 @@ const updateChatSessionTitle = async (chatSession, botType) => {
       console.error(`[updateChatSessionTitle] Error: Chat session ${chatSession._id} not found during title update.`);
       return { success: false, message: 'Chat session not found.' };
     }
-    console.log(`[updateChatSessionTitle] Session ${chatSession._id} re-fetched with promptId: ${sessionWithPrompt.promptId}`);
 
     const botInstance = await getBot(botType, sessionWithPrompt.promptId ? sessionWithPrompt.promptId._id : null);
     console.log(`[updateChatSessionTitle] Bot instance created for botType: ${botType}`);
 
     const suggestedTitle = await botInstance.generateTitle(fullHistory);
-    console.log(`[updateChatSessionTitle] Suggested title for session ${chatSession._id}: "${suggestedTitle}"`);
 
     sessionWithPrompt.title = suggestedTitle;
     await sessionWithPrompt.save();
-    console.log(`[updateChatSessionTitle] Session ${chatSession._id} title updated and saved to: "${suggestedTitle}"`);
 
     return { success: true };
   } catch (error) {

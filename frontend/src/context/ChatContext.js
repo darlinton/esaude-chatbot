@@ -43,7 +43,7 @@ export const ChatProvider = ({ children }) => {
         setError(null);
         try {
             const { data } = await api.getChatSessions();
-            console.log("[ChatContext] Fetched chat sessions:", data); // Add logging
+            // console.log("[ChatContext] Fetched chat sessions:", data);
             setChatSessions(data);
         } catch (err) {
             console.error('Error fetching chat sessions:', err);
@@ -58,12 +58,12 @@ export const ChatProvider = ({ children }) => {
         setError(null);
         try {
             const { data } = await api.getChatSessionById(sessionId);
-            console.log("[ChatContext] fetchMessages - Fetched session data:", data);
+            // console.log("[ChatContext] fetchMessages - Fetched session data:", data);
             setCurrentSession(data);
             setMessages(data.messages || []);
             const botTypeFromSession = data.botType || 'openai'; // Default to 'openai' if not present
             setSessionBotType(botTypeFromSession);
-            console.log("[ChatContext] fetchMessages - Setting sessionBotType to:", botTypeFromSession);
+            // console.log("[ChatContext] fetchMessages - Setting sessionBotType to:", botTypeFromSession);
         } catch (err) {
             console.error('Error fetching messages:', err);
             setError('Failed to load messages.');
@@ -104,7 +104,7 @@ export const ChatProvider = ({ children }) => {
         } finally {
             setIsSendingMessage(false); // Set loading to false after message is sent or fails
         }
-    }, [currentSession, error]); // Removed fetchChatSessions
+    }, [currentSession, error]);
 
     const startNewChat = useCallback(async () => {
         setLoading(true);
