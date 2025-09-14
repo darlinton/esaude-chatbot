@@ -27,16 +27,10 @@ const AdminSessionDetailPage = () => {
     const fetchSessionDetails = async () => {
         try {
             setLoading(true);
-            // Fetch all sessions and find the specific one (as there's no direct endpoint for a single session detail yet)
-            const sessionsResponse = await api.get('/admin/sessions');
-            const currentSession = sessionsResponse.data.find(s => s._id === sessionId);
-            setSessionDetails(currentSession);
-
-            const messagesResponse = await api.get(`/admin/sessions/${sessionId}/messages`);
-            setMessages(messagesResponse.data);
-
-            const evaluationsResponse = await api.get(`/admin/sessions/${sessionId}/evaluations`);
-            setEvaluations(evaluationsResponse.data);
+            const sessionResponse = await api.get(`/admin/sessions/${sessionId}`);
+            setSessionDetails(sessionResponse.data);
+            setMessages(sessionResponse.data.messages);
+            setEvaluations(sessionResponse.data.evaluations);
 
             setLoading(false);
         } catch (err) {
@@ -66,6 +60,7 @@ const AdminSessionDetailPage = () => {
                 <p><strong>User Email:</strong> {sessionDetails.user ? sessionDetails.user.email : 'N/A'}</p>
                 <p><strong>User Name:</strong> {sessionDetails.user ? sessionDetails.user.displayName : 'N/A'}</p>
                 <p><strong>Created At:</strong> {new Date(sessionDetails.createdAt).toLocaleString()}</p>
+                <p><strong>Bot Type:</strong> {sessionDetails.botType}</p>
             </div>
 
             <div className="bg-white shadow-md rounded-lg p-6 mb-6">

@@ -8,10 +8,10 @@ import EvaluationForm from '../components/Evaluation/EvaluationForm';
 
 const DashboardPage = () => {
     const { user, loading: authLoading } = useAuth();
-    const { chatSessions, fetchChatSessions, currentSession, setCurrentSession, startNewChat, loading: chatLoading, error: chatError, fetchEvaluation } = useChat();
+    const { chatSessions, fetchChatSessions, currentSession, startNewChat, loading: chatLoading, error: chatError, fetchEvaluation, fetchMessages } = useChat();
     const [showEvaluationForm, setShowEvaluationForm] = useState(false);
     const [selectedSessionForEval, setSelectedSessionForEval] = useState(null);
-    const [sessionEvaluation, setSessionEvaluation] = useState(null); // New state for evaluation
+    const [sessionEvaluation, setSessionEvaluation] = useState(null);
     const [isNewSession, setIsNewSession] = useState(false);
 
     useEffect(() => {
@@ -40,14 +40,11 @@ const DashboardPage = () => {
     const handleStartNewChat = async () => {
         setIsNewSession(true); // Mark session as new to prevent premature evaluation fetch
         const result = await startNewChat();
-        if (result.success) {
-            await fetchChatSessions(); // Refresh list to show new session
-        }
     };
 
     const handleSelectSession = (session) => {
         setIsNewSession(false); // Existing sessions are not new
-        setCurrentSession(session);
+        fetchMessages(session._id); // Directly fetch messages, which also sets currentSession and sessionBotType
     };
 
     const handleEndChat = () => {
@@ -60,8 +57,7 @@ const DashboardPage = () => {
     const handleCloseEvaluationForm = async () => {
         setShowEvaluationForm(false);
         setSelectedSessionForEval(null);
-        setCurrentSession(null); // Clear current session after evaluation
-        await fetchChatSessions(); // Re-fetch sessions to update any new evaluations
+
     };
 
     const { t } = useTranslation();

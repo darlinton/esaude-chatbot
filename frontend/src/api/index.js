@@ -34,7 +34,7 @@ API.interceptors.response.use(
     }
 );
 
-export const createChatSession = (title, botType, promptId) => API.post('/chats', { title, botType, promptId });
+export const createChatSession = () => API.post('/chats',);
 export const getChatSessions = () => API.get('/chats');
 export const getChatSessionById = (id) => API.get(`/chats/${id}`);
 export const sendMessage = (sessionId, content, botType) => API.post(`/chats/${sessionId}/messages`, { sessionId, content, botType });

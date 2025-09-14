@@ -6,9 +6,8 @@ import Spinner from '../Common/Spinner';
 import { useChat } from '../../context/ChatContext';
 
 const ChatWindow = ({ sessionId }) => {
-    const { messages, loading, error, fetchMessages, sendMessage, isSendingMessage } = useChat(); // Destructure isSendingMessage
+    const { messages, loading, error, fetchMessages, sendMessage, isSendingMessage, sessionBotType, setSessionBotType } = useChat();
     const messagesEndRef = useRef(null);
-    const [selectedBot, setSelectedBot] = useState('openai'); // Default bot
 
     useEffect(() => {
         if (sessionId) {
@@ -21,7 +20,7 @@ const ChatWindow = ({ sessionId }) => {
     }, [messages]);
 
     const handleSendMessage = async (content) => {
-        await sendMessage(sessionId, content, selectedBot);
+        await sendMessage(sessionId, content, sessionBotType); // Use sessionBotType from context
     };
 
     const { t } = useTranslation();
@@ -35,8 +34,9 @@ const ChatWindow = ({ sessionId }) => {
                 <h2 className="text-lg font-semibold text-gray-800 mb-2 sm:mb-0">{t('chatWindow.chatWith')}</h2>
                 <select
                     className="p-2 border border-gray-300 rounded-md w-full sm:w-auto text-base"
-                    value={selectedBot}
-                    onChange={(e) => setSelectedBot(e.target.value)}
+                    value={sessionBotType || 'openai'} // Use sessionBotType from context, default to openai
+                    onChange={(e) => setSessionBotType(e.target.value)} // Update sessionBotType in context
+                    disabled={messages.length > 0} // Disable if messages exist
                 >
                     <option value="openai">ImunoAjudaMG (gpt-4o-mini)</option>
                     <option value="gemini">ImunoAjudaMG (gemini-1.5-flash)</option>
@@ -48,7 +48,7 @@ const ChatWindow = ({ sessionId }) => {
                     <div className="text-center text-gray-500 mt-10">{t('chatWindow.startTyping')}</div>
                 ) : (
                     messages.map((msg) => (
-                        <Message key={msg._id} message={msg} />
+                        <Message key={msg._id} message={msg} botType={sessionBotType} />
                     ))
                 )}
                 <div ref={messagesEndRef} />

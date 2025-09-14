@@ -12,7 +12,7 @@ export const ChatProvider = ({ children }) => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isSendingMessage, setIsSendingMessage] = useState(false); // New state for message sending
-    const [sessionBotType, setSessionBotType] = useState(null); // Initialize to null, not hardcoded 'openai'
+    const [sessionBotType, setSessionBotType] = useState(null);
     const [error, setError] = useState(null);
 
     // Effect to reset chat state when user changes (login/logout)
@@ -58,9 +58,12 @@ export const ChatProvider = ({ children }) => {
         setError(null);
         try {
             const { data } = await api.getChatSessionById(sessionId);
+            console.log("[ChatContext] fetchMessages - Fetched session data:", data);
             setCurrentSession(data);
             setMessages(data.messages || []);
-            setSessionBotType(data.botType || null); // Set botType from session data, or null if not present
+            const botTypeFromSession = data.botType || 'openai'; // Default to 'openai' if not present
+            setSessionBotType(botTypeFromSession);
+            console.log("[ChatContext] fetchMessages - Setting sessionBotType to:", botTypeFromSession);
         } catch (err) {
             console.error('Error fetching messages:', err);
             setError('Failed to load messages.');
@@ -70,21 +73,27 @@ export const ChatProvider = ({ children }) => {
         }
     }, []);
 
-    const sendMessage = useCallback(async (sessionId, content, botType = 'openai') => {
+    const sendMessage = useCallback(async (sessionId, content, botType) => {
         setIsSendingMessage(true); // Set loading to true when sending message
         setError(null);
         try {
             const { data } = await api.sendMessage(sessionId, content, botType);
             setMessages((prevMessages) => [...prevMessages, data.userMessage, data.botMessage]);
             
-            // After sending a message, refresh sessions to update last message/timestamp and potentially the title
-            await fetchChatSessions(); 
+            // After sending a message, update sessions to move the current session to the top and update its details
+            setChatSessions(prevSessions => {
+                const updatedSessions = prevSessions.map(session => 
+                    session._id === sessionId ? { ...session, title: data.sessionTitle || session.title, updatedAt: new Date().toISOString() } : session
+                );
+                // Move the current session to the top
+                const current = updatedSessions.find(session => session._id === sessionId);
+                const others = updatedSessions.filter(session => session._id !== sessionId);
+                return current ? [current, ...others] : others;
+            });
 
-            // Also, explicitly update the currentSession if its title might have changed
-            // This ensures the active session's title is immediately reflected in the UI
+            // Update the currentSession state with the new title if it changed
             if (currentSession && currentSession._id === sessionId) {
-                const updatedSessionResponse = await api.getChatSessionById(sessionId);
-                setCurrentSession(updatedSessionResponse.data);
+                setCurrentSession(prev => ({ ...prev, title: data.sessionTitle || prev.title }));
             }
 
             return { success: true, response: data };
@@ -95,17 +104,16 @@ export const ChatProvider = ({ children }) => {
         } finally {
             setIsSendingMessage(false); // Set loading to false after message is sent or fails
         }
-    }, [fetchChatSessions, currentSession, error]);
+    }, [currentSession, error]); // Removed fetchChatSessions
 
-    const startNewChat = useCallback(async (title = 'New Chat', botType) => { // Removed hardcoded default for botType
+    const startNewChat = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const { data } = await api.createChatSession(title, botType); // Pass botType to API
+            const { data } = await api.createChatSession();
             setChatSessions((prevSessions) => [data, ...prevSessions]);
             setCurrentSession(data);
             setMessages([]);
-            setSessionBotType(data.botType || null); // Set botType for the new session
             return { success: true, session: data };
         } catch (err) {
             console.error('Error creating new chat session:', err);
@@ -163,7 +171,8 @@ export const ChatProvider = ({ children }) => {
         startNewChat,
         submitEvaluation,
         fetchEvaluation,
-        sessionBotType, // Include sessionBotType in context value
+        sessionBotType,
+        setSessionBotType, // Expose setSessionBotType
     };
 
     return (
