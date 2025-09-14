@@ -1,11 +1,12 @@
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import * as api from '../api';
 
 const ChatContext = createContext(null);
 
 export const ChatProvider = ({ children }) => {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth(); // Get authLoading to prevent premature actions
+
     const [chatSessions, setChatSessions] = useState([]);
     const [currentSession, setCurrentSession] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -14,9 +15,28 @@ export const ChatProvider = ({ children }) => {
     const [sessionBotType, setSessionBotType] = useState(null); // Initialize to null, not hardcoded 'openai'
     const [error, setError] = useState(null);
 
+    // Effect to reset chat state when user changes (login/logout)
+    useEffect(() => {
+        if (!authLoading) { // Only run after auth context has finished loading
+            setChatSessions([]);
+            setCurrentSession(null);
+            setMessages([]);
+            setSessionBotType(null);
+            setError(null);
+            // If a user is logged in, fetch their sessions
+            if (user) {
+                fetchChatSessions();
+            }
+        }
+    }, [user, authLoading]); // Depend on user and authLoading
+
     const fetchChatSessions = useCallback(async () => {
         if (!user) {
             setChatSessions([]);
+            return;
+        }
+        // Prevent fetching if auth is still loading or no user is present
+        if (authLoading || !user) {
             return;
         }
         setLoading(true);

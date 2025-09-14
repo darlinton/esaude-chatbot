@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
             const { data } = await API.post('/auth/login', { email, password });
             localStorage.setItem('profile', JSON.stringify(data));
             setUser(data);
+            API.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             return { success: true };
         } catch (error) {
             console.error('Login error:', error.response?.data?.message || error.message);
@@ -44,11 +45,13 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         localStorage.removeItem('profile');
         setUser(null);
+        delete API.defaults.headers.common['Authorization'];
     };
 
     const handleGoogleLogin = (userData) => {
         localStorage.setItem('profile', JSON.stringify(userData));
         setUser(userData);
+        API.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
     };
 
     return (
