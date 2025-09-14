@@ -13,7 +13,8 @@ const {
     setDefaultBotPrompt,
     getAllBotApiKeys,
     updateBotApiKey,
-    getSessionDetails
+    getSessionDetails,
+    exportChatSessions
 } = require('../controllers/adminController');
 
 const router = express.Router();
@@ -21,6 +22,7 @@ const router = express.Router();
 // Admin-specific routes
 router.route('/upgrade-user').post(protect, authorize('admin'), upgradeUserToAdmin);
 router.route('/sessions').get(protect, authorize('admin'), getAllUserSessions);
+router.route('/sessions/export').get(protect, authorize('admin'), exportChatSessions);
 router.route('/sessions/:sessionId/messages').get(protect, authorize('admin'), getSessionMessages);
 router.route('/sessions/:sessionId/evaluations').get(protect, authorize('admin'), getSessionEvaluations);
 router.route('/sessions/:sessionId').get(protect, authorize('admin'), getSessionDetails);
@@ -40,5 +42,8 @@ router.route('/api-keys')
     .get(protect, authorize('admin'), getAllBotApiKeys);
 router.route('/api-keys/:botType')
     .put(protect, authorize('admin'), updateBotApiKey);
+
+
+router.route('/sessions/export').get(protect, authorize('admin'), exportChatSessions);
 
 module.exports = router;

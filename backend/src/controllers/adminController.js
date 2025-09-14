@@ -4,6 +4,7 @@ const Message = require('../models/Message');
 const Evaluation = require('../models/Evaluation');
 const BotPrompt = require('../models/BotPrompt');
 const BotApiKey = require('../models/BotApiKey');
+const { parse } = require('json2csv');
 
 // @desc    Upgrade a user to admin role
 // @route   POST /api/admin/upgrade-user
@@ -268,4 +269,59 @@ exports.updateBotApiKey = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
+};
+
+// @desc    Export chat sessions to CSV
+// @route   GET /api/admin/sessions/export
+// @access  Admin
+exports.exportChatSessions = async (req, res) => {
+    console.log('exportChatSessions called');
+    try {
+        const messages = await Message.find()
+            .populate({
+                path: 'session',
+                populate: { path: 'user', select: 'displayName email' }
+            })
+            .sort('timestamp');
+
+        console.log(`Found ${messages.length} messages`);
+
+        if (!messages || messages.length === 0) {
+            console.log('No messages found, returning 404');
+            return res.status(404).json({ message: 'No chat sessions found to export.' });
+        }
+
+        const csvData = messages.map(message => ({
+            SessionID: message.session?._id.toString() || 'N/A',
+            UserID: message.session?.user?.email.toString() || 'N/A',
+            User: message.session.user?.displayName.toString() || 'N/A',
+            SessionTitle: message.session?.title?.toString() || 'N/A',
+            Bot: message.session?.botType?.toString() || 'N/A',
+            MessageID: message._id.toString(),
+            MessageContent: message.content,
+            Sender: message.sender,
+            Timestamp: message.timestamp.toISOString(),
+        }));
+
+        //console.log('CSV data generated, attempting to parse', csvData.length);
+        try {
+            const csv = parse(csvData, {
+                fields: ['SessionID', 'UserID', 'User', 'SessionTitle', 'Bot', 'MessageID', 'MessageContent', 'Sender', 'Timestamp'],
+            });
+            //console.log('CSV parsing successful');
+            //console.log(csv);
+
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', 'attachment; filename="chat_sessions.csv"');
+            res.status(200).send(csv);
+        } catch (parseError) {
+            console.error('Error during CSV parsing:', parseError);
+            return res.status(500).json({ message: 'Server error exporting chat sessions - CSV parsing failed' });
+        }
+
+    } catch (error) {
+        console.error('Error exporting chat sessions:', error);
+        res.status(500).json({ message: 'Server error exporting chat sessions' });
+    }
+    
 };
