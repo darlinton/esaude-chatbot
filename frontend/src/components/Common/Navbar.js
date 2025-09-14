@@ -48,6 +48,16 @@ const Navbar = () => {
                                     <Link to="/about" onClick={toggleMenu} className="block py-2 px-4 text-white hover:text-gray-400 lg:inline-block lg:py-0 lg:px-0 lg:ml-4 lg:mr-4">
                                         {t('navbar.aboutLink')}
                                     </Link>
+                                    {user.role === 'admin' && (
+                                        <>
+                                            <Link to="/admin/prompts" onClick={toggleMenu} className="block py-2 px-4 text-white hover:text-gray-400 lg:inline-block lg:py-0 lg:px-0 lg:ml-4 lg:mr-4">
+                                                Prompt Management
+                                            </Link>
+                                            <Link to="/admin/api-keys" onClick={toggleMenu} className="block py-2 px-4 text-white hover:text-gray-400 lg:inline-block lg:py-0 lg:px-0 lg:ml-4 lg:mr-4">
+                                                API Key Management
+                                            </Link>
+                                        </>
+                                    )}
                                     <button onClick={() => { logout(); toggleMenu(); }} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 w-full lg:mt-0 lg:w-auto lg:ml-4">
                                         {t('navbar.logoutButton')}
                                     </button>

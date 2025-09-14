@@ -11,6 +11,8 @@ import AboutPage from './pages/AboutPage';
 import GoogleAuthCallback from './components/Auth/GoogleAuthCallback';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminSessionDetailPage from './pages/AdminSessionDetailPage';
+import AdminPromptPage from './pages/AdminPromptPage'; // Import new page
+import AdminApiKeyPage from './pages/AdminApiKeyPage'; // Import new page
 import Spinner from './components/Common/Spinner';
 
 const PrivateRoute = ({ children }) => {
@@ -74,6 +76,22 @@ function App() {
                                 element={
                                     <AdminRoute>
                                         <AdminSessionDetailPage />
+                                    </AdminRoute>
+                                }
+                            />
+                            <Route
+                                path="/admin/prompts"
+                                element={
+                                    <AdminRoute>
+                                        <AdminPromptPage />
+                                    </AdminRoute>
+                                }
+                            />
+                            <Route
+                                path="/admin/api-keys"
+                                element={
+                                    <AdminRoute>
+                                        <AdminApiKeyPage />
                                     </AdminRoute>
                                 }
                             />

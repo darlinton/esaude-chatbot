@@ -34,11 +34,23 @@ API.interceptors.response.use(
     }
 );
 
-export const createChatSession = (title) => API.post('/chats', { title: title });
+export const createChatSession = (title, botType, promptId) => API.post('/chats', { title, botType, promptId });
 export const getChatSessions = () => API.get('/chats');
 export const getChatSessionById = (id) => API.get(`/chats/${id}`);
 export const sendMessage = (sessionId, content, botType) => API.post(`/chats/${sessionId}/messages`, { sessionId, content, botType });
 export const submitEvaluation = (sessionId, rating, comment) => API.post('/evaluations', { sessionId, rating, comment });
 export const fetchEvaluation = (sessionId) => API.get(`/evaluations/${sessionId}`);
+
+// Admin Prompt Management
+export const createBotPrompt = (newPrompt) => API.post('/admin/prompts', newPrompt);
+export const getAllBotPrompts = () => API.get('/admin/prompts');
+export const getBotPromptById = (id) => API.get(`/admin/prompts/${id}`);
+export const updateBotPrompt = (id, updatedPrompt) => API.put(`/admin/prompts/${id}`, updatedPrompt);
+export const deleteBotPrompt = (id) => API.delete(`/admin/prompts/${id}`);
+export const setDefaultBotPrompt = (id) => API.put(`/admin/prompts/${id}/set-default`);
+
+// Admin API Key Management
+export const getAllBotApiKeys = () => API.get('/admin/api-keys');
+export const updateBotApiKey = (botType, apiKey) => API.put(`/admin/api-keys/${botType}`, { apiKey });
 
 export default API;

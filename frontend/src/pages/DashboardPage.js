@@ -4,13 +4,11 @@ import { useAuth } from '../hooks/useAuth';
 import { useChat } from '../context/ChatContext';
 import ChatWindow from '../components/Chat/ChatWindow';
 import Spinner from '../components/Common/Spinner';
-import API from '../api';
 import EvaluationForm from '../components/Evaluation/EvaluationForm';
 
 const DashboardPage = () => {
     const { user, loading: authLoading } = useAuth();
-    const { currentSession, setCurrentSession, startNewChat, loading: chatLoading, error: chatError, fetchEvaluation } = useChat();
-    const [chatSessions, setChatSessions] = useState([]);
+    const { chatSessions, fetchChatSessions, currentSession, setCurrentSession, startNewChat, loading: chatLoading, error: chatError, fetchEvaluation } = useChat();
     const [showEvaluationForm, setShowEvaluationForm] = useState(false);
     const [selectedSessionForEval, setSelectedSessionForEval] = useState(null);
     const [sessionEvaluation, setSessionEvaluation] = useState(null); // New state for evaluation
@@ -20,7 +18,7 @@ const DashboardPage = () => {
         if (user) {
             fetchChatSessions();
         }
-    }, [user]);
+    }, [user, fetchChatSessions]);
 
     useEffect(() => {
         const getEvaluation = async () => {
@@ -39,20 +37,11 @@ const DashboardPage = () => {
         getEvaluation();
     }, [currentSession, fetchEvaluation, isNewSession]);
 
-    const fetchChatSessions = async () => {
-        try {
-            const { data } = await API.get('/chats');
-            setChatSessions(data);
-        } catch (error) {
-            console.error('Failed to fetch chat sessions:', error);
-        }
-    };
-
     const handleStartNewChat = async () => {
         setIsNewSession(true); // Mark session as new to prevent premature evaluation fetch
         const result = await startNewChat();
         if (result.success) {
-            fetchChatSessions(); // Refresh list to show new session
+            await fetchChatSessions(); // Refresh list to show new session
         }
     };
 
@@ -68,11 +57,11 @@ const DashboardPage = () => {
         }
     };
 
-    const handleCloseEvaluationForm = () => {
+    const handleCloseEvaluationForm = async () => {
         setShowEvaluationForm(false);
         setSelectedSessionForEval(null);
         setCurrentSession(null); // Clear current session after evaluation
-        fetchChatSessions(); // Re-fetch sessions to update any new evaluations
+        await fetchChatSessions(); // Re-fetch sessions to update any new evaluations
     };
 
     const { t } = useTranslation();

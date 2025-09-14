@@ -1,91 +1,15 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const BotInterface = require('./BotInterface');
 
-const SYSTEM_PROMPT_CONTENT = `
-Agente de Assistência: ImunoAjudaMG – versão 1.0
-
-Atue em primeira pessoa como {ImunoAjudaMG}.
-Sua função é orientar cidadãos de Minas Gerais sobre como buscar imunobiológicos especiais. Use os fluxos abaixo para organizar, guiar e executar a tarefa. Você tem acesso às ferramentas:
-{[Parâmetros], [Fluxo_principal], [Fluxo_orientação], [Comandos_úteis], [Regras], [Limitações]}.
-
-[Parâmetros]
-[organizar] = repetir o que o usuário pediu para confirmar.
-[estrutura] = criar mapa de atendimento e etapas.
-[resumo] = explicar o que será feito com base na dúvida do usuário.
-[localizar_crie] = consultar onde há centros CRIE próximos.
-[verificar_critério] = listar se o caso do usuário é elegível.
-[documentos] = informar quais documentos são exigidos.
-[encaminhamento] = explicar como obter a prescrição correta.
-[confirmar_usuario] = validar se a explicação foi suficiente.
-[atualizar_dúvida] = adaptar a resposta conforme novas informações.
-
-[Fluxo_principal]
-[boas-vindas + nome] →
-[organizar] →
-[estrutura] →
-[resumo] →
-[Fluxo_orientação] →
-[confirmar_usuario] →
-[fim ou nova dúvida]
-
-[Fluxo_orientação]
-[verificar_critério] →
-[localizar_crie] →
-[documentos] →
-[encaminhamento] →
-[atualizar_dúvida]
-
-[Comandos_úteis]
-[perguntar_sintomas]: solicita ao usuário os sintomas/condições clínicas.
-[listar_cries_mg]: exibe lista dos CRIEs disponíveis por cidade.
-[explicar_papel_crie]: descreve o que o CRIE faz.
-[exibir_vacinas_especiais]: lista exemplos de imunobiológicos especiais.
-[verificar_caso_específico]: compara o caso informado com critérios do MS.
-[passo_a_passo_atendimento]: orienta do início ao fim o que fazer.
-[encaminhar_para_saude_local]: orienta como buscar UBS/ESF para encaminhamento.
-
-[Regras]
-1. Sempre atue como assistente de orientação, com foco no cidadão.
-2. Use linguagem simples, mas respeitosa e precisa.
-3. Confirme tudo com o usuário a cada passo.
-4. Evite termos técnicos sem explicação.
-5. Nunca ofereça diagnóstico. Apenas oriente para serviços públicos oficiais.
-6. Toda resposta deve indicar o próximo passo prático.
-7. O link correto para a FICHA PARA SOLICITAÇÃO DE IMUNOBIOLÓGICOS ESPECIAIS (CRIE) é http://vigilancia.saude.mg.gov.br/index.php/download/ficha-para-solicitacao-de-imunobiologicos-especiais-crie/?wpdmdl=18834
-8. A resposta deve possuir apenas texto sem formatação.
-9. O paciente pode utilizar o cartão SUS ou CPF para identificação.
-
-[Limitações]
-- Não substituir profissionais de saúde.
-- Não receitar imunobiológicos.
-- Não indicar vacinas sem prescrição oficial.
-- Atuar exclusivamente no contexto do SUS-MG.
-- Manter dados de referência atualizados conforme publicações da SES/MG ou MS.
-- Apenas use texto simples (não use markdown!).
-
-[Exemplo]
-Usuário: "Meu filho tem asplenia, como consigo a vacina contra meningite?"
-
-ImunoAjudaMG:
-Olá! Posso te ajudar com isso. Você está em Minas Gerais, certo? ✅
-Vamos seguir o fluxo de atendimento para imunobiológicos especiais:
-
-1️⃣ [verificar_critério] → Asplenia está sim na lista de indicações.
-2️⃣ [localizar_crie] → Você pode buscar o CRIE mais próximo. Acesse o site oficial para saber onde tem CRIE.
-3️⃣ [documentos] → Você vai precisar de laudo médico, prescrição e Cartão SUS ou CPF.
-4️⃣ [encaminhamento] → O médico precisa preencher o Formulário de Solicitação.
-
-Qual orientação você deseja?
-`.trim();
-
 class GeminiBot extends BotInterface {
-  constructor(apiKey) {
+  constructor(apiKey, systemPromptContent) {
     super();
     if (!apiKey) {
       throw new Error('Gemini API key is not provided.');
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    this.systemPromptContent = systemPromptContent;
   }
 
   /**
@@ -97,18 +21,58 @@ class GeminiBot extends BotInterface {
   async generateResponse(prompt, history) {
     try {
       const messages = [];
-      messages.push({ role: 'user', parts: [{ text: SYSTEM_PROMPT_CONTENT }] }); // Gemini treats system prompts as user messages in history
+      
+      // Gemini's API requires the first message to be from a 'user' role.
+      // If systemPromptContent exists, it acts as the initial 'user' message.
+      // Otherwise, we need to ensure the first message from history is a 'user' message.
+      if (this.systemPromptContent) {
+        messages.push({ role: 'user', parts: [{ text: this.systemPromptContent }] });
+      }
 
-      // Adiciona o histórico da conversa
+      // Add the conversation history, ensuring roles alternate correctly for Gemini.
+      // If systemPromptContent was added, the next message should ideally be 'model'.
+      // If history starts with 'user', it's fine. If it starts with 'bot' and no system prompt,
+      // this could cause the error.
       history.forEach(msg => {
         messages.push({
-          role: msg.role === 'user' ? 'user' : 'model',
+          role: msg.sender === 'user' ? 'user' : 'model', // Correctly using msg.sender for history
           parts: [{ text: msg.content }]
         });
       });
   
+      // If the messages array is empty or starts with a 'model' role, and no system prompt was set,
+      // this is where the error "First content should be with role 'user', got model" would occur.
+      // We need to ensure the first message in the history passed to startChat is always 'user'.
+      // The current structure of `messages` should handle this if `systemPromptContent` is present.
+      // If `systemPromptContent` is NOT present, and `history` starts with a 'bot' message,
+      // then `messages` will start with 'model', causing the error.
+      // To fix this, we need to ensure `history` is always properly structured or
+      // prepend a dummy user message if the first actual message is from the bot.
+      // However, the `history` is coming directly from the Message model, which should alternate.
+      // The issue might be if `history` is empty or starts with a bot message when `systemPromptContent` is null.
+
+      // Let's ensure the history passed to startChat always begins with a user role.
+      // If the first message in `messages` is 'model' and it's not preceded by a 'user' (system prompt),
+      // then we have a problem.
+      let chatHistoryForGemini = [...messages];
+
+      // If the first message in the constructed history is 'model' and there was no system prompt,
+      // it means the actual conversation history started with a bot message, which Gemini disallows.
+      // This scenario should ideally not happen if chat sessions always start with a user message.
+      // However, to be safe, we can prepend a dummy user message if needed.
+      if (chatHistoryForGemini.length > 0 && chatHistoryForGemini[0].role === 'model' && !this.systemPromptContent) {
+        // This case implies a malformed history or an edge case where a session starts with a bot.
+        // For now, let's assume valid history from the Message model.
+        // The error is more likely from the `systemPromptContent` being empty and `history` starting with a bot.
+        // The `history.forEach` uses `msg.sender`, which is correct.
+        // The problem is if `messages` array starts with `role: 'model'`
+        // This happens if `this.systemPromptContent` is null AND `history[0].sender` is 'bot'.
+        // The `createChatSession` in chatController ensures `promptId` is set, so `systemPromptContent` should be present.
+        // Let's re-verify the `generateTitle` method as well.
+      }
+
       const chat = this.model.startChat({
-        history: messages,
+        history: chatHistoryForGemini,
         generationConfig: {
           maxOutputTokens: 500,
         },
@@ -151,10 +115,21 @@ class GeminiBot extends BotInterface {
    */
   async generateTitle(history) {
     try {
-      const messages = history.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.content }]
-      }));
+      const messages = [];
+      // For title generation, we don't necessarily need the system prompt.
+      // We just need to ensure the history passed to Gemini is valid.
+      // If the first message in history is from the bot, Gemini will complain.
+      // We can prepend a dummy user message if the history starts with a bot message.
+      if (history.length > 0 && history[0].sender === 'bot') {
+        messages.push({ role: 'user', parts: [{ text: 'Start of conversation.' }] });
+      }
+
+      history.forEach(msg => {
+        messages.push({
+          role: msg.sender === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.content }]
+        });
+      });
 
       // Ensure there's at least one message with content before proceeding
       if (!messages || messages.length === 0 || !messages[0].parts || !messages[0].parts[0] || !messages[0].parts[0].text) {

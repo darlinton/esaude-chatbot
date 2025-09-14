@@ -4,7 +4,15 @@ const {
     upgradeUserToAdmin,
     getAllUserSessions,
     getSessionMessages,
-    getSessionEvaluations
+    getSessionEvaluations,
+    createBotPrompt,
+    getAllBotPrompts,
+    getBotPromptById,
+    updateBotPrompt,
+    deleteBotPrompt,
+    setDefaultBotPrompt,
+    getAllBotApiKeys,
+    updateBotApiKey
 } = require('../controllers/adminController');
 
 const router = express.Router();
@@ -14,5 +22,21 @@ router.route('/upgrade-user').post(protect, authorize('admin'), upgradeUserToAdm
 router.route('/sessions').get(protect, authorize('admin'), getAllUserSessions);
 router.route('/sessions/:sessionId/messages').get(protect, authorize('admin'), getSessionMessages);
 router.route('/sessions/:sessionId/evaluations').get(protect, authorize('admin'), getSessionEvaluations);
+
+// Bot Prompt Management Routes
+router.route('/prompts')
+    .post(protect, authorize('admin'), createBotPrompt)
+    .get(protect, authorize('admin'), getAllBotPrompts);
+router.route('/prompts/:id')
+    .get(protect, authorize('admin'), getBotPromptById)
+    .put(protect, authorize('admin'), updateBotPrompt)
+    .delete(protect, authorize('admin'), deleteBotPrompt);
+router.route('/prompts/:id/set-default').put(protect, authorize('admin'), setDefaultBotPrompt);
+
+// Bot API Key Management Routes
+router.route('/api-keys')
+    .get(protect, authorize('admin'), getAllBotApiKeys);
+router.route('/api-keys/:botType')
+    .put(protect, authorize('admin'), updateBotApiKey);
 
 module.exports = router;
