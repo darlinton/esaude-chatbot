@@ -5,11 +5,16 @@ const Evaluation = require('../models/Evaluation');
 const BotPrompt = require('../models/BotPrompt');
 const BotApiKey = require('../models/BotApiKey');
 const { parse } = require('json2csv');
+const logger = require('../config/logger'); // Import logger
 
 // @desc    Upgrade a user to admin role
 // @route   POST /api/admin/upgrade-user
 // @access  Admin (via terminal command/internal tool for now)
-exports.upgradeUserToAdmin = async (req, res) => {
+exports.upgradeUserToAdmin = async (req, res, next) => { // Added next parameter
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { email } = req.body;
 
     try {
@@ -24,15 +29,15 @@ exports.upgradeUserToAdmin = async (req, res) => {
 
         res.status(200).json({ message: `User ${email} upgraded to admin successfully` });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error upgrading user to admin:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Get session details for a specific session
 // @route   GET /api/admin/sessions/:sessionId
 // @access  Admin
-exports.getSessionDetails = async (req, res) => {
+exports.getSessionDetails = async (req, res, next) => { // Added next parameter
     try {
         const { sessionId } = req.params;
 
@@ -52,54 +57,58 @@ exports.getSessionDetails = async (req, res) => {
 
         res.status(200).json(sessionDetails);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error fetching session details:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Get all user sessions
 // @route   GET /api/admin/sessions
 // @access  Admin
-exports.getAllUserSessions = async (req, res) => {
+exports.getAllUserSessions = async (req, res, next) => { // Added next parameter
     try {
         const sessions = await ChatSession.find().populate('user', 'displayName email').sort({ createdAt: -1 });
         res.status(200).json(sessions);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error fetching all user sessions:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Get chat messages for a specific session
 // @route   GET /api/admin/sessions/:sessionId/messages
 // @access  Admin
-exports.getSessionMessages = async (req, res) => {
+exports.getSessionMessages = async (req, res, next) => { // Added next parameter
     try {
         const messages = await Message.find({ chatSession: req.params.sessionId }).sort('timestamp');
         res.status(200).json(messages);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error fetching session messages:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Get evaluations for a specific session
 // @route   GET /api/admin/sessions/:sessionId/evaluations
 // @access  Admin
-exports.getSessionEvaluations = async (req, res) => {
+exports.getSessionEvaluations = async (req, res, next) => { // Added next parameter
     try {
         const evaluations = await Evaluation.find({ chatSession: req.params.sessionId });
         res.status(200).json(evaluations);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error fetching session evaluations:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Create a new bot prompt
 // @route   POST /api/admin/prompts
 // @access  Admin
-exports.createBotPrompt = async (req, res) => {
+exports.createBotPrompt = async (req, res, next) => { // Added next parameter
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { promptName, botType, promptContent, isDefault } = req.body;
 
     try {
@@ -110,28 +119,28 @@ exports.createBotPrompt = async (req, res) => {
         await newPrompt.save();
         res.status(201).json(newPrompt);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error creating bot prompt:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Get all bot prompts
 // @route   GET /api/admin/prompts
 // @access  Admin
-exports.getAllBotPrompts = async (req, res) => {
+exports.getAllBotPrompts = async (req, res, next) => { // Added next parameter
     try {
         const prompts = await BotPrompt.find();
         res.status(200).json(prompts);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error fetching all bot prompts:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Get a single bot prompt by ID
 // @route   GET /api/admin/prompts/:id
 // @access  Admin
-exports.getBotPromptById = async (req, res) => {
+exports.getBotPromptById = async (req, res, next) => { // Added next parameter
     try {
         const prompt = await BotPrompt.findById(req.params.id);
         if (!prompt) {
@@ -139,15 +148,19 @@ exports.getBotPromptById = async (req, res) => {
         }
         res.status(200).json(prompt);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error fetching bot prompt by ID:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Update a bot prompt
 // @route   PUT /api/admin/prompts/:id
 // @access  Admin
-exports.updateBotPrompt = async (req, res) => {
+exports.updateBotPrompt = async (req, res, next) => { // Added next parameter
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { promptName, botType, promptContent, isDefault } = req.body;
 
     try {
@@ -171,15 +184,15 @@ exports.updateBotPrompt = async (req, res) => {
         await prompt.save();
         res.status(200).json(prompt);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error updating bot prompt:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Delete a bot prompt
 // @route   DELETE /api/admin/prompts/:id
 // @access  Admin
-exports.deleteBotPrompt = async (req, res) => {
+exports.deleteBotPrompt = async (req, res, next) => { // Added next parameter
     try {
         const prompt = await BotPrompt.findById(req.params.id);
         if (!prompt) {
@@ -197,15 +210,15 @@ exports.deleteBotPrompt = async (req, res) => {
         await prompt.deleteOne();
         res.status(200).json({ message: 'Prompt removed' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error deleting bot prompt:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Set a bot prompt as default
 // @route   PUT /api/admin/prompts/:id/set-default
 // @access  Admin
-exports.setDefaultBotPrompt = async (req, res) => {
+exports.setDefaultBotPrompt = async (req, res, next) => { // Added next parameter
     try {
         const prompt = await BotPrompt.findById(req.params.id);
         if (!prompt) {
@@ -221,15 +234,15 @@ exports.setDefaultBotPrompt = async (req, res) => {
 
         res.status(200).json(prompt);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error setting bot prompt as default:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Get all bot API keys
 // @route   GET /api/admin/api-keys
 // @access  Admin
-exports.getAllBotApiKeys = async (req, res) => {
+exports.getAllBotApiKeys = async (req, res, next) => { // Added next parameter
     try {
         const apiKeys = await BotApiKey.find();
         // In a real application, you might mask the API key content for security
@@ -241,15 +254,19 @@ exports.getAllBotApiKeys = async (req, res) => {
             updatedAt: key.updatedAt
         })));
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error fetching all bot API keys:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Update a bot API key
 // @route   PUT /api/admin/api-keys/:botType
 // @access  Admin
-exports.updateBotApiKey = async (req, res) => {
+exports.updateBotApiKey = async (req, res, next) => { // Added next parameter
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { apiKey } = req.body;
     const { botType } = req.params;
 
@@ -266,16 +283,16 @@ exports.updateBotApiKey = async (req, res) => {
         await botApiKey.save();
         res.status(200).json({ message: `${botType} API key updated successfully` });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        logger.error('Error updating bot API key:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Export chat sessions to CSV
 // @route   GET /api/admin/sessions/export
 // @access  Admin
-exports.exportChatSessions = async (req, res) => {
-    console.log('exportChatSessions called');
+exports.exportChatSessions = async (req, res, next) => { // Added next parameter
+    logger.info('exportChatSessions called'); // Use logger
     try {
         const messages = await Message.find()
             .populate({
@@ -284,10 +301,10 @@ exports.exportChatSessions = async (req, res) => {
             })
             .sort('timestamp');
 
-        console.log(`Found ${messages.length} messages`);
+        logger.info(`Found ${messages.length} messages`); // Use logger
 
         if (!messages || messages.length === 0) {
-            console.log('No messages found, returning 404');
+            logger.warn('No messages found for export, returning 404'); // Use logger
             return res.status(404).json({ message: 'No chat sessions found to export.' });
         }
 
@@ -303,32 +320,29 @@ exports.exportChatSessions = async (req, res) => {
             Timestamp: message.timestamp.toISOString(),
         }));
 
-        //console.log('CSV data generated, attempting to parse', csvData.length);
         try {
             const csv = parse(csvData, {
                 fields: ['SessionID', 'UserID', 'User', 'SessionTitle', 'Bot', 'MessageID', 'MessageContent', 'Sender', 'Timestamp'],
             });
-            //console.log('CSV parsing successful');
-            //console.log(csv);
 
             res.setHeader('Content-Type', 'text/csv');
             res.setHeader('Content-Disposition', 'attachment; filename="chat_sessions.csv"');
             res.status(200).send(csv);
         } catch (parseError) {
-            console.error('Error during CSV parsing:', parseError);
+            logger.error('Error during CSV parsing:', parseError); // Use logger
             return res.status(500).json({ message: 'Server error exporting chat sessions - CSV parsing failed' });
         }
 
     } catch (error) {
-        console.error('Error exporting chat sessions:', error);
-        res.status(500).json({ message: 'Server error exporting chat sessions' });
+        logger.error('Error exporting chat sessions:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
     
 };
 // @desc    Export chat sessions to JSON
 // @route   GET /api/admin/sessions/export/json
 // @access  Admin
-exports.exportChatSessionsJson = async (req, res) => {
+exports.exportChatSessionsJson = async (req, res, next) => { // Added next parameter
     try {
         const sessions = await ChatSession.find()
             .populate('user', 'displayName email')
@@ -346,7 +360,7 @@ exports.exportChatSessionsJson = async (req, res) => {
         res.setHeader('Content-Disposition', 'attachment; filename=chat_sessions.json');
         res.status(200).json(sessions);
     } catch (error) {
-        console.error('Error exporting chat sessions to JSON:', error);
-        res.status(500).json({ message: 'Server error exporting chat sessions to JSON' });
+        logger.error('Error exporting chat sessions to JSON:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };

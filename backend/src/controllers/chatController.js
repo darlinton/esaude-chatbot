@@ -2,11 +2,12 @@ const Message = require('../models/Message');
 const ChatSession = require('../models/ChatSession');
 const BotPrompt = require('../models/BotPrompt'); // Import BotPrompt model
 const { getBot } = require('../services/bots/BotManager');
+const logger = require('../config/logger'); // Import logger
 
 // @desc    Create a new chat session
 // @route   POST /api/chats
 // @access  Private
-const createChatSession = async (req, res) => {
+const createChatSession = async (req, res, next) => { // Added next parameter
     // Safely get properties from req.body, defaulting to an empty object if req.body is null or undefined
     const { title, botType, promptId } = req.body || {};
 
@@ -31,56 +32,59 @@ const createChatSession = async (req, res) => {
         });
         res.status(201).json(chatSession);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        logger.error('Error creating chat session:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Get all chat sessions for the logged-in user
 // @route   GET /api/chats
 // @access  Private
-const getChatSessions = async (req, res) => {
+const getChatSessions = async (req, res, next) => { // Added next parameter
     try {
         const chatSessions = await ChatSession.find({ user: req.user.id }).sort({ createdAt: -1 });
         res.status(200).json(chatSessions);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        logger.error('Error fetching chat sessions:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Get a single chat session by ID
 // @route   GET /api/chats/:id
 // @access  Private
-const getChatSessionById = async (req, res) => {
+const getChatSessionById = async (req, res, next) => { // Added next parameter
     try {
         const chatSession = await ChatSession.findById(req.params.id).populate('messages');
 
         if (!chatSession) {
-            console.log(`[getChatSessionById] Chat session ${req.params.id} not found.`);
+            logger.warn(`[getChatSessionById] Chat session ${req.params.id} not found.`); // Use logger
             return res.status(404).json({ message: 'Chat session not found' });
         }
 
-        console.log(`[getChatSessionById] User ID from token: ${req.user.id}`);
-        console.log(`[getChatSessionById] Chat session owner ID: ${chatSession.user.toString()}`);
-        console.log(`[getChatSessionById] User role: ${req.user.role}`);
+        logger.debug(`[getChatSessionById] User ID from token: ${req.user.id}`); // Use logger
+        logger.debug(`[getChatSessionById] Chat session owner ID: ${chatSession.user.toString()}`); // Use logger
+        logger.debug(`[getChatSessionById] User role: ${req.user.role}`); // Use logger
 
         // Ensure the session belongs to the logged-in user
         if (chatSession.user.toString() !== req.user.id) {
-            console.log(`[getChatSessionById] Authorization failed: Session owner (${chatSession.user.toString()}) does not match logged-in user (${req.user.id}).`);
+            logger.warn(`[getChatSessionById] Authorization failed: Session owner (${chatSession.user.toString()}) does not match logged-in user (${req.user.id}).`); // Use logger
             return res.status(403).json({ message: 'Not authorized to view this chat session' });
         }
 
-        console.log(`[getChatSessionById] Authorization successful for session ${req.params.id}.`);
+        logger.debug(`[getChatSessionById] Authorization successful for session ${req.params.id}.`); // Use logger
 
         res.status(200).json(chatSession);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        logger.error('Error fetching chat session by ID:', error); // Use logger
+        next(error); // Pass error to the centralized error handler
     }
 };
 
 // @desc    Send a message and get bot response
 // @route   POST /api/chats/:sessionId/messages
 // @access  Private
-const sendMessage = async (req, res) => {
+const sendMessage = async (req, res, next) => { // Added next parameter
   const { sessionId, content, botType } = req.body;
   const userId = req.user.id;
 
@@ -88,6 +92,7 @@ const sendMessage = async (req, res) => {
     const chatSession = await ChatSession.findById(sessionId);
 
     if (!chatSession || chatSession.user.toString() !== userId) {
+      logger.warn(`[sendMessage] Chat session ${sessionId} not found or unauthorized for user ${userId}.`); // Use logger
       return res.status(404).json({ message: 'Chat session not found or unauthorized.' });
     }
 
@@ -130,25 +135,25 @@ const sendMessage = async (req, res) => {
 
     res.status(200).json({ userMessage, botMessage, sessionId: chatSession._id });
   } catch (error) {
-    console.error('Error sending message:', error);
-    res.status(500).json({ message: 'Error sending message', error: error.message });
+    logger.error('Error sending message:', error); // Use logger
+    next(error); // Pass error to the centralized error handler
   }
 };
 
-const updateChatSessionTitle = async (chatSession, botType) => {
-  console.log(`[updateChatSessionTitle] Attempting to update title for session: ${chatSession._id}`);
+const updateChatSessionTitle = async (chatSession, botType, next) => { // Added next parameter
+  logger.info(`[updateChatSessionTitle] Attempting to update title for session: ${chatSession._id}`); // Use logger
   try {
     const fullHistory = await Message.find({ session: chatSession._id }).sort('timestamp');
-    console.log(`[updateChatSessionTitle] Fetched history for session ${chatSession._id}, messages count: ${fullHistory.length}`);
+    logger.debug(`[updateChatSessionTitle] Fetched history for session ${chatSession._id}, messages count: ${fullHistory.length}`); // Use logger
 
     const sessionWithPrompt = await ChatSession.findById(chatSession._id).populate('promptId');
     if (!sessionWithPrompt) {
-      console.error(`[updateChatSessionTitle] Error: Chat session ${chatSession._id} not found during title update.`);
+      logger.error(`[updateChatSessionTitle] Error: Chat session ${chatSession._id} not found during title update.`); // Use logger
       return { success: false, message: 'Chat session not found.' };
     }
 
     const botInstance = await getBot(botType, sessionWithPrompt.promptId ? sessionWithPrompt.promptId._id : null);
-    console.log(`[updateChatSessionTitle] Bot instance created for botType: ${botType}`);
+    logger.debug(`[updateChatSessionTitle] Bot instance created for botType: ${botType}`); // Use logger
 
     const suggestedTitle = await botInstance.generateTitle(fullHistory);
 
@@ -157,8 +162,8 @@ const updateChatSessionTitle = async (chatSession, botType) => {
 
     return { success: true };
   } catch (error) {
-    console.error(`[updateChatSessionTitle] Error updating chat session title for ${chatSession._id}:`, error);
-    return { success: false, message: error.message };
+    logger.error(`[updateChatSessionTitle] Error updating chat session title for ${chatSession._id}:`, error); // Use logger
+    next(error); // Pass error to the centralized error handler
   }
 };
 

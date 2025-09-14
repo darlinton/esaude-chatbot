@@ -18,5 +18,10 @@
   "devDependencies": {
     "concurrently": "^8.2.2",
     "serve": "^14.0.0"
+  },
+  "dependencies": {
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "winston": "^3.17.0"
   }
 }

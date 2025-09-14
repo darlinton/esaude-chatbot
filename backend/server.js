@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: '.env' });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -8,10 +8,27 @@ const cookieParser = require('cookie-parser');
 require('./src/models/User'); // Ensure User model is loaded before passport
 require('./src/services/passport'); // Passport configuration
 
+// Logger configuration
+const logger = require('./src/config/logger');
+const helmet = require('helmet');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+// Security Headers
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP for OAuth routes if needed, or configure more granularly
+}));
+// Exclude auth routes from helmet protection if they cause issues
+app.use('/api/auth', (req, res, next) => {
+    // You might need to adjust this logic based on how helmet is configured
+    // For now, we assume helmet is applied globally and we want to bypass it for /api/auth
+    // A more robust solution might involve helmet's own exclusion options if available
+    // For simplicity, we'll just let it pass through without helmet's protection
+    next();
+});
+
 const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(',') : [];
 
 app.use(cors({
@@ -46,8 +63,19 @@ app.use(passport.session());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
+    .then(() => logger.info('MongoDB connected')) // Use logger
+    .catch(err => next(err)); // Pass error to the error-handling middleware
+
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+    logger.error(err.stack); // Use logger for error stack trace
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).json({
+        message: err.message || 'Internal Server Error',
+        // Optionally, include stack trace in development environments
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    });
+});
 
 // Routes
 require('./src/routes/authRoutes')(app); // Pass the app object to authRoutes
@@ -62,5 +90,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    logger.info(`Server running on port ${PORT}`); // Use logger
 });

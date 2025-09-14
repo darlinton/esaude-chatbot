@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { validationResult } = require('express-validator'); // Import validationResult
 
 // Generate JWT
 const generateToken = (id) => {
@@ -11,12 +12,13 @@ const generateToken = (id) => {
 // @desc    Register new user
 // @route   POST /api/auth/signup
 // @access  Public
-const signupUser = async (req, res) => {
-    const { displayName, email, password } = req.body;
-
-    if (!displayName || !email || !password) {
-        return res.status(400).json({ message: 'Please enter all fields' });
+const signupUser = async (req, res, next) => { // Added next parameter
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
     }
+
+    const { displayName, email, password } = req.body;
 
     // Check if user exists
     const userExists = await User.findOne({ email });
@@ -41,43 +43,55 @@ const signupUser = async (req, res) => {
                 token: generateToken(user._id),
             });
         } else {
+            // This case should ideally not be reached if User.create is successful
             res.status(400).json({ message: 'Invalid user data' });
         }
     } catch (error) {
-        console.error('Signup error:', error);
-        res.status(500).json({ message: 'Server error during signup' });
+        logger.error('Signup error:', error); // Use logger
+        // Pass the error to the centralized error handler
+        next(error);
     }
 };
 
 // @desc    Authenticate a user
 // @route   POST /api/auth/login
 // @access  Public
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { email, password } = req.body;
 
     // Check for user email
-    const user = await User.findOne({ email });
+    try {
+        const user = await User.findOne({ email });
 
-    if (user && (await user.matchPassword(password))) {
-        res.json({
-            _id: user.id,
-            displayName: user.displayName,
-            email: user.email,
-            role: user.role,
-            token: generateToken(user._id),
-        });
-    } else {
-        res.status(400).json({ message: 'Invalid credentials' });
+        if (user && (await user.matchPassword(password))) {
+            res.json({
+                _id: user.id,
+                displayName: user.displayName,
+                email: user.email,
+                role: user.role,
+                token: generateToken(user._id),
+            });
+        } else {
+            res.status(400).json({ message: 'Invalid credentials' });
+        }
+    } catch (error) {
+        logger.error('Login error:', error); // Log the error
+        next(error); // Pass to centralized handler
     }
 };
 
 // @desc    Google authentication callback
 // @route   GET /api/auth/google/callback
 // @access  Public
-const googleAuthCallback = async (req, res) => {
+const googleAuthCallback = async (req, res, next) => { // Added next parameter
     try {
         // Get the user profile from the Google authentication response
-        console.log('Google authentication callback called:', req.user);
+        logger.info('Google authentication callback called:', req.user); // Use logger
 
         // Create a JWT token for the user
         const token = generateToken(req.user._id);
@@ -91,8 +105,9 @@ const googleAuthCallback = async (req, res) => {
 
         res.redirect('/auth/google/success');
     } catch (error) {
-        console.error('Google authentication callback error:', error);
-        res.status(500).json({ message: 'Error handling Google authentication callback' });
+        logger.error('Google authentication callback error:', error); // Use logger
+        // Pass the error to the centralized error handler
+        next(error);
     }
 };
 

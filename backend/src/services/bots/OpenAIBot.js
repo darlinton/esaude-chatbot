@@ -1,5 +1,6 @@
 const BotInterface = require('./BotInterface');
 const { OpenAI } = require('openai');
+const logger = require('../../config/logger'); // Import the logger
 
 class OpenAIBot extends BotInterface {
   constructor(apiKey, systemPromptContent) {
@@ -42,7 +43,7 @@ class OpenAIBot extends BotInterface {
   
       return completion.choices[0].message.content;
     } catch (error) {
-      console.error('Error generating OpenAI response:', error);
+      logger.error('Error generating OpenAI response:', error);
       throw error;
     }
   }
@@ -87,7 +88,7 @@ class OpenAIBot extends BotInterface {
 
       return title;
     } catch (error) {
-      console.error('Error generating OpenAI title:', error);
+      logger.error('Error generating OpenAI title:', error);
       // Fallback to a generic title if title generation fails
       return 'Chat Session';
     }

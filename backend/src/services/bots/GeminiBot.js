@@ -1,5 +1,6 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const BotInterface = require('./BotInterface');
+const logger = require('../../config/logger'); // Import the logger
 
 class GeminiBot extends BotInterface {
   constructor(apiKey, systemPromptContent) {
@@ -98,11 +99,11 @@ class GeminiBot extends BotInterface {
       }
         
       // Log the full response for debugging purposes
-      console.error('Gemini response without text:', response); 
+      logger.error('Gemini response without text:', response); 
         
       return errorMessage + ' Por favor, tente novamente.';
     } catch (error) {
-      console.error('Error generating response from Gemini:', error);
+      logger.error('Error generating response from Gemini:', error);
       throw error;
     }
   }
@@ -157,7 +158,7 @@ class GeminiBot extends BotInterface {
 
       return title;
     } catch (error) {
-      console.error('Error generating title from Gemini:', error);
+      logger.error('Error generating title from Gemini:', error);
       // Fallback to a generic title if title generation fails
       return 'Chat Session';
     }

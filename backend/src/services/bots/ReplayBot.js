@@ -1,4 +1,5 @@
 const BotInterface = require('./BotInterface');
+const logger = require('../../config/logger'); // Import the logger
 
 class ReplayBot extends BotInterface {
   constructor() {
@@ -14,8 +15,8 @@ class ReplayBot extends BotInterface {
    */
   async generateResponse(prompt, history) {
     // Placeholder for actual ReplayBot API call
-    console.log('ReplayBot generating response for:', prompt);
-    console.log('History:', history);
+    logger.info('ReplayBot generating response for:', prompt);
+    logger.debug('History:', history);
     return `This is a response from ReplayBot for: "${prompt}"`;
   }
 
