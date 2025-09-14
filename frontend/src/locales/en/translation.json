@@ -35,7 +35,10 @@
     "loginButton": "Login",
     "dashboardLink": "Dashboard",
     "historyLink": "History",
-    "aboutLink": "About"
+    "aboutLink": "About",
+    "adminPromptManagement": "Prompt Management",
+    "adminApiKeyManagement": "API Key Management",
+    "adminSessionManagement": "Session Management"
   },
   "chatWindow": {
     "chatWith": "Chat with:",

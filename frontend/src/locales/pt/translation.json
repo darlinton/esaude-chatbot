@@ -35,7 +35,10 @@
     "loginButton": "Entrar",
     "dashboardLink": "Painel",
     "historyLink": "Histórico",
-    "aboutLink": "Sobre"
+    "aboutLink": "Sobre",
+    "adminPromptManagement": "Admin-Prompts",
+    "adminApiKeyManagement": "Admin-APIKeys",
+    "adminSessionManagement": "Admin-Sessões"
   },
   "chatWindow": {
     "chatWith": "Conversar com:",
