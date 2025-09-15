@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const logger = require('../config/logger'); // Import the logger
 const { validationResult } = require('express-validator'); // Import validationResult
 
 // Generate JWT
