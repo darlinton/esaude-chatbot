@@ -118,6 +118,7 @@ const getSession = async (req, res) => {
             _id: req.user.id,
             displayName: req.user.displayName,
             email: req.user.email,
+            role: req.user.role,
             token: req.cookies.token,
         });
     } else {
